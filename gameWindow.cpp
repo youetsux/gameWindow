@@ -10,6 +10,7 @@
 #include <wrl/client.h>
 
 #include "Direct3D.h"
+#include "Quad.h"
 
 //#pragma comment(lib, "d3d11.lib")
 
@@ -21,6 +22,8 @@ namespace {
 	const int WINDOW_WIDTH = 800;                          // ウィンドウの幅
 	const int WINDOW_HEIGHT = 600;                          // ウィンドウの高さ
 	RECT WIN_RECT = { 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT }; // ウィンドウの矩形
+
+	Quad* quad = nullptr; // Quad クラスのインスタンスへのポインタ
 
 }
 
@@ -52,9 +55,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         return FALSE;
     }
 
+
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_GAMEWINDOW));
 
     MSG msg = {};
+
+	quad = new Quad(); // Quad クラスのインスタンスを作成
+	quad->Initialize(); // Quad クラスの初期化
 
     // メイン メッセージ ループ:
     while (msg.message != WM_QUIT)
@@ -68,11 +75,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		{
 			Direct3D::BeginDraw(); // 描画開始  
             //ゲームロジックをここに書くよ
+
+			quad->Draw(); // Quad クラスの描画
 			Direct3D::EndDraw();   // 描画終了
 
 		}
     }
-
+	quad->Release(); // Quad クラスの解放
 	Direct3D::Release(); // Direct3D 11 の解放
 
     return (int) msg.wParam;

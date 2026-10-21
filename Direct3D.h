@@ -14,4 +14,6 @@ namespace Direct3D
 	void Release();
 	//シェーダの初期化処理
 	void InitShader();
+	extern ID3D11Device* pDevice;	//デバイス
+	extern ID3D11DeviceContext* pContext; //デバイスコンテキスト
 }
