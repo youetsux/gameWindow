@@ -21,7 +21,7 @@ public:
 	~Quad();
 	// ‰Šú‰»
 	void Initialize();
-	void Draw();
+	void Draw(XMMATRIX& WorldMatrix);
 	void Release();
 	XMVECTOR vertices[4]; // ’¸“_À•W
 };

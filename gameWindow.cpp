@@ -10,11 +10,13 @@
 #include <wrl/client.h>
 
 #include "Direct3D.h"
+#include "Camera.h"
 #include "Quad.h"
 
 //#pragma comment(lib, "d3d11.lib")
 
 namespace {
+  
     // グローバル変数:
     HINSTANCE hInst;                                // 現在のインターフェイス
     WCHAR szTitle[MAX_LOADSTRING];                  // タイトル バーのテキスト
@@ -73,11 +75,21 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		}
 		else
 		{
+            static float rot = 0.0f;
+			Camera::Update(); // カメラの更新
+
+            Camera::SetPosition(XMVectorSet(0, 3, -10, 0));	//カメラの位置
+            Camera::SetTarget(XMVectorSet(0, 0, 0, 0));	//カメラの焦点
+
 			Direct3D::BeginDraw(); // 描画開始  
             //ゲームロジックをここに書くよ
-
-			quad->Draw(); // Quad クラスの描画
-			Direct3D::EndDraw();   // 描画終了
+			XMMATRIX transform = XMMatrixIdentity(); // ワールド行列を単位行列に初期化
+			transform = XMMatrixTranslation(0, 2, 0); // ワールド行列を平行移動行列に設定
+			transform = XMMatrixRotationY(rot)*transform; // ワールド行列を回転行列に設定
+			quad->Draw(transform); // Quad クラスの描画
+			
+			rot += 0.01f; // 回転角度を更新
+            Direct3D::EndDraw();   // 描画終了
 
 		}
     }
@@ -144,7 +156,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    UpdateWindow(hWnd);
 
    Direct3D::Initialize(windowWidth, windowHeight, hWnd); // Direct3D 11 の初期化
-
+   Camera::Initialize(); // カメラの初期化
 
    return TRUE;
 }
