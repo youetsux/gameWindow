@@ -83,9 +83,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 			Direct3D::BeginDraw(); // 描画開始  
             //ゲームロジックをここに書くよ
+			//ワールドマトリクス　W=SRT　Scale*Rotation*Translation
+            //Rotation=Rz*Rx*Ry (ロールピッチヨーの順）
 			XMMATRIX transform = XMMatrixIdentity(); // ワールド行列を単位行列に初期化
-			transform = XMMatrixTranslation(0, 2, 0); // ワールド行列を平行移動行列に設定
-			transform = XMMatrixRotationY(rot)*transform; // ワールド行列を回転行列に設定
+			XMMATRIX scale = XMMatrixScaling(2, 2, 1); // 行列を拡大縮小行列に設定
+			XMMATRIX rotation = XMMatrixRotationY(rot); // 行列を回転行列に設定
+			XMMATRIX translation = XMMatrixTranslation(2, 0, 0); // 行列を平行移動行列に設定
+			transform = scale * rotation * translation; // ワールド行列に拡大縮小行列を適用
 			quad->Draw(transform); // Quad クラスの描画
 			
 			rot += 0.01f; // 回転角度を更新
