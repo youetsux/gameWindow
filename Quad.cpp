@@ -8,10 +8,18 @@ Quad::Quad()
 	 pTexture_(nullptr)
 
 {
-	vertices[0] = {XMVectorSet(-1.0f,  1.0f, 0.0f, 1.0f),   XMVectorSet(0,0,0,0)};	// 四角形の頂点（左上）
-	vertices[1] = {XMVectorSet( 1.0f,  1.0f, 0.0f, 1.0f),   XMVectorSet(1,0,0,0)};	// 四角形の頂点（右上）
-	vertices[2] = {XMVectorSet( 1.0f, -1.0f, 0.0f, 1.0f),   XMVectorSet(1,1,0,0)};	// 四角形の頂点（右下）
-	vertices[3] = {XMVectorSet(-1.0f, -1.0f, 0.0f, 1.0f),   XMVectorSet(0,1,0,0)};	// 四角形の頂点（左下）		
+	vertices[0] = {XMVectorSet(-1.0f,  1.0f, 0.0f, 1.0f),   
+		           XMVectorSet(0,0,0,0),
+				   XMVectorSet(0, 0, -1, 1) };	// 四角形の頂点（左上）
+	vertices[1] = {XMVectorSet( 1.0f,  1.0f, 0.0f, 1.0f),   
+		           XMVectorSet(1, 0, 0, 0), 
+		           XMVectorSet(0, 0, -1, 1)};	// 四角形の頂点（右上）
+	vertices[2] = {XMVectorSet( 1.0f, -1.0f, 0.0f, 1.0f),   
+		           XMVectorSet(1, 1, 0, 0), 
+		           XMVectorSet(0, 0, -1, 1)};	// 四角形の頂点（右下）
+	vertices[3] = {XMVectorSet(-1.0f, -1.0f, 0.0f, 1.0f),   
+		           XMVectorSet(0, 1, 0, 0), 
+		           XMVectorSet(0, 0, -1, 1)};	// 四角形の頂点（左下）		
 }
 
 Quad::~Quad()
@@ -81,6 +89,7 @@ void Quad::Draw(XMMATRIX& WorldMatrix)
 
 	CONSTANT_BUFFER cb;
 	cb.matWVP = XMMatrixTranspose(WorldMatrix * Camera::GetViewMatrix() * Camera::GetProjectionMatrix());
+	cb.matW = XMMatrixTranspose(WorldMatrix); //ワールド行列を転置してコンスタントバッファに渡す
 
 	//コンスタントバッファにデータを転送する
 	D3D11_MAPPED_SUBRESOURCE pdata;
