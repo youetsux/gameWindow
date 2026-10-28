@@ -8,18 +8,17 @@
 using namespace DirectX;
 
 namespace {
-	wchar_t* StringToWChar(const std::string& str) {
-		if (str.empty()) return nullptr;
+	// std::wstringを返却するように変更（メモリ安全）
+	std::wstring StringToWString(const std::string& str) {
+		if (str.empty()) return L"";
 
-		// 必要なバッファサイズを取得（終端null含む）
+		// 必要なバッファサイズを取得
 		int size_needed = MultiByteToWideChar(CP_ACP, 0, &str[0], (int)str.size(), NULL, 0);
 
-		std::vector<wchar_t> wstrTo(size_needed + 1);
+		std::wstring wstrTo(size_needed, 0);
 		MultiByteToWideChar(CP_ACP, 0, &str[0], (int)str.size(), &wstrTo[0], size_needed);
-		wstrTo[size_needed] = L'\0';
 
-		// 注意: new またはヒープで確保したポインターを返す場合は、呼び出し側で delete[] が必要
-		// または std::vector<wchar_t> や std::wstring で管理することを推奨します。
+		return wstrTo;
 	}
 }
 
@@ -38,7 +37,7 @@ HRESULT Texture::Load(std::string fileName)
 	HRESULT hr;
 
 	//実際に読んでゆくぅ　　　　　 
-	hr = LoadFromWICFile(StringToWChar(fileName), 
+	hr = LoadFromWICFile(StringToWString(fileName).data(),
 		                 WIC_FLAGS::WIC_FLAGS_NONE,
 		                 &metadata, image);
 	if (FAILED(hr))
@@ -69,6 +68,7 @@ HRESULT Texture::Load(std::string fileName)
 	{
 		return S_FALSE;
 	}
+	return S_OK;
 }
 
 void Texture::Release()
