@@ -31,7 +31,7 @@ public:
 	void Initialize();
 	void Draw(XMMATRIX& WorldMatrix);
 	void Release();
-	VERTEX vertices[4]; // 頂点座標
+	VERTEX vertices[24]; // 頂点座標
 private:
 	ID3D11Buffer* pVertexBuffer_;	//頂点バッファ
 	ID3D11Buffer* pIndexBuffer_;    //インデックスバッファ

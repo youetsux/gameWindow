@@ -8,18 +8,149 @@ Quad::Quad()
 	 pTexture_(nullptr)
 
 {
-	vertices[0] = {XMVectorSet(-1.0f,  1.0f, 0.0f, 1.0f),   
-		           XMVectorSet(0,0,0,0),
-				   XMVectorSet(0, 0, -1, 1) };	// 四角形の頂点（左上）
-	vertices[1] = {XMVectorSet( 1.0f,  1.0f, 0.0f, 1.0f),   
-		           XMVectorSet(1, 0, 0, 0), 
-		           XMVectorSet(0, 0, -1, 1)};	// 四角形の頂点（右上）
-	vertices[2] = {XMVectorSet( 1.0f, -1.0f, 0.0f, 1.0f),   
-		           XMVectorSet(1, 1, 0, 0), 
-		           XMVectorSet(0, 0, -1, 1)};	// 四角形の頂点（右下）
-	vertices[3] = {XMVectorSet(-1.0f, -1.0f, 0.0f, 1.0f),   
-		           XMVectorSet(0, 1, 0, 0), 
-		           XMVectorSet(0, 0, -1, 1)};	// 四角形の頂点（左下）		
+	//vertices[0] = {XMVectorSet(-1.0f,  1.0f, 0.0f, 1.0f),   
+	//	           XMVectorSet(0,0,0,0),
+	//			   XMVectorSet(0, 0, -1, 1) };	// 四角形の頂点（左上）
+	//vertices[1] = {XMVectorSet( 1.0f,  1.0f, 0.0f, 1.0f),   
+	//	           XMVectorSet(1, 0, 0, 0), 
+	//	           XMVectorSet(0, 0, -1, 1)};	// 四角形の頂点（右上）
+	//vertices[2] = {XMVectorSet( 1.0f, -1.0f, 0.0f, 1.0f),   
+	//	           XMVectorSet(1, 1, 0, 0), 
+	//	           XMVectorSet(0, 0, -1, 1)};	// 四角形の頂点（右下）
+	//vertices[3] = {XMVectorSet(-1.0f, -1.0f, 0.0f, 1.0f),   
+	//	           XMVectorSet(0, 1, 0, 0), 
+	//	           XMVectorSet(0, 0, -1, 1)};	// 四角形の頂点（左下）	
+	// 手前（-Z）：1
+	vertices[0] = {
+		XMVectorSet(-1.0f,  1.0f, -1.0f, 1.0f),
+		XMVectorSet(0, 0, 0, 0),
+		XMVectorSet(0, 0, -1, 0)
+	};
+	vertices[1] = {
+		XMVectorSet(1.0f,  1.0f, -1.0f, 1.0f),
+		XMVectorSet(1.0f / 3.0f, 0, 0, 0),
+		XMVectorSet(0, 0, -1, 0)
+	};
+	vertices[2] = {
+		XMVectorSet(1.0f, -1.0f, -1.0f, 1.0f),
+		XMVectorSet(1.0f / 3.0f, 0.5f, 0, 0),
+		XMVectorSet(0, 0, -1, 0)
+	};
+	vertices[3] = {
+		XMVectorSet(-1.0f, -1.0f, -1.0f, 1.0f),
+		XMVectorSet(0, 0.5f, 0, 0),
+		XMVectorSet(0, 0, -1, 0)
+	};
+
+	// 奥（+Z）：6
+	vertices[4] = {
+		XMVectorSet(1.0f,  1.0f, 1.0f, 1.0f),
+		XMVectorSet(2.0f / 3.0f, 0.5f, 0, 0),
+		XMVectorSet(0, 0, 1, 0)
+	};
+	vertices[5] = {
+		XMVectorSet(-1.0f,  1.0f, 1.0f, 1.0f),
+		XMVectorSet(1, 0.5f, 0, 0),
+		XMVectorSet(0, 0, 1, 0)
+	};
+	vertices[6] = {
+		XMVectorSet(-1.0f, -1.0f, 1.0f, 1.0f),
+		XMVectorSet(1, 1, 0, 0),
+		XMVectorSet(0, 0, 1, 0)
+	};
+	vertices[7] = {
+		XMVectorSet(1.0f, -1.0f, 1.0f, 1.0f),
+		XMVectorSet(2.0f / 3.0f, 1, 0, 0),
+		XMVectorSet(0, 0, 1, 0)
+	};
+
+	// 右（+X）：2
+	vertices[8] = {
+		XMVectorSet(1.0f,  1.0f, -1.0f, 1.0f),
+		XMVectorSet(1.0f / 3.0f, 0, 0, 0),
+		XMVectorSet(1, 0, 0, 0)
+	};
+	vertices[9] = {
+		XMVectorSet(1.0f,  1.0f,  1.0f, 1.0f),
+		XMVectorSet(2.0f / 3.0f, 0, 0, 0),
+		XMVectorSet(1, 0, 0, 0)
+	};
+	vertices[10] = {
+		XMVectorSet(1.0f, -1.0f,  1.0f, 1.0f),
+		XMVectorSet(2.0f / 3.0f, 0.5f, 0, 0),
+		XMVectorSet(1, 0, 0, 0)
+	};
+	vertices[11] = {
+		XMVectorSet(1.0f, -1.0f, -1.0f, 1.0f),
+		XMVectorSet(1.0f / 3.0f, 0.5f, 0, 0),
+		XMVectorSet(1, 0, 0, 0)
+	};
+
+	// 左（-X）：5
+	vertices[12] = {
+		XMVectorSet(-1.0f,  1.0f,  1.0f, 1.0f),
+		XMVectorSet(1.0f / 3.0f, 0.5f, 0, 0),
+		XMVectorSet(-1, 0, 0, 0)
+	};
+	vertices[13] = {
+		XMVectorSet(-1.0f,  1.0f, -1.0f, 1.0f),
+		XMVectorSet(2.0f / 3.0f, 0.5f, 0, 0),
+		XMVectorSet(-1, 0, 0, 0)
+	};
+	vertices[14] = {
+		XMVectorSet(-1.0f, -1.0f, -1.0f, 1.0f),
+		XMVectorSet(2.0f / 3.0f, 1, 0, 0),
+		XMVectorSet(-1, 0, 0, 0)
+	};
+	vertices[15] = {
+		XMVectorSet(-1.0f, -1.0f,  1.0f, 1.0f),
+		XMVectorSet(1.0f / 3.0f, 1, 0, 0),
+		XMVectorSet(-1, 0, 0, 0)
+	};
+
+	// 上（+Y）：3
+	vertices[16] = {
+		XMVectorSet(-1.0f, 1.0f,  1.0f, 1.0f),
+		XMVectorSet(2.0f / 3.0f, 0, 0, 0),
+		XMVectorSet(0, 1, 0, 0)
+	};
+	vertices[17] = {
+		XMVectorSet(1.0f, 1.0f,  1.0f, 1.0f),
+		XMVectorSet(1, 0, 0, 0),
+		XMVectorSet(0, 1, 0, 0)
+	};
+	vertices[18] = {
+		XMVectorSet(1.0f, 1.0f, -1.0f, 1.0f),
+		XMVectorSet(1, 0.5f, 0, 0),
+		XMVectorSet(0, 1, 0, 0)
+	};
+	vertices[19] = {
+		XMVectorSet(-1.0f, 1.0f, -1.0f, 1.0f),
+		XMVectorSet(2.0f / 3.0f, 0.5f, 0, 0),
+		XMVectorSet(0, 1, 0, 0)
+	};
+
+	// 下（-Y）：4
+	vertices[20] = {
+		XMVectorSet(-1.0f, -1.0f, -1.0f, 1.0f),
+		XMVectorSet(0, 0.5f, 0, 0),
+		XMVectorSet(0, -1, 0, 0)
+	};
+	vertices[21] = {
+		XMVectorSet(1.0f, -1.0f, -1.0f, 1.0f),
+		XMVectorSet(1.0f / 3.0f, 0.5f, 0, 0),
+		XMVectorSet(0, -1, 0, 0)
+	};
+	vertices[22] = {
+		XMVectorSet(1.0f, -1.0f,  1.0f, 1.0f),
+		XMVectorSet(1.0f / 3.0f, 1, 0, 0),
+		XMVectorSet(0, -1, 0, 0)
+	};
+	vertices[23] = {
+		XMVectorSet(-1.0f, -1.0f,  1.0f, 1.0f),
+		XMVectorSet(0, 1, 0, 0),
+		XMVectorSet(0, -1, 0, 0)
+	};
 }
 
 Quad::~Quad()
@@ -29,7 +160,7 @@ void Quad::Initialize()
 {
 	// 頂点データ用バッファの設定
 	D3D11_BUFFER_DESC bd_vertex;
-	bd_vertex.ByteWidth = sizeof(VERTEX) * 4; // バッファのサイズ
+	bd_vertex.ByteWidth = sizeof(vertices); // バッファのサイズ
 	bd_vertex.Usage = D3D11_USAGE_DEFAULT;
 	bd_vertex.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	bd_vertex.CPUAccessFlags = 0;
@@ -40,7 +171,17 @@ void Quad::Initialize()
 	Direct3D::pDevice->CreateBuffer(&bd_vertex, &data_vertex, &pVertexBuffer_);
 
 	//インデックス情報
-	int index[] = { 0,2,3, 0,1,2 };
+	//int index[] = { 0,2,3, 0,1,2 };
+	int index[] = {
+	 0,  2,  3,   0,  1,  2,
+	 4,  6,  7,   4,  5,  6,
+	 8, 10, 11,   8,  9, 10,
+	12, 14, 15,  12, 13, 14,
+	16, 18, 19,  16, 17, 18,
+	20, 22, 23,  20, 21, 22
+	};
+
+	
 	// インデックスバッファを生成する
 	D3D11_BUFFER_DESC   bd;
 	bd.Usage = D3D11_USAGE_DEFAULT;
@@ -70,7 +211,7 @@ void Quad::Initialize()
 
 	//テクスチャの読み込み
 	pTexture_ = new Texture;
-	HRESULT hr = pTexture_->Load("image.jpg");
+	HRESULT hr = pTexture_->Load("Assets\\sainome.png");
 	if(FAILED(hr))
 	{
 		// エラーハンドリング
@@ -118,7 +259,7 @@ void Quad::Draw(XMMATRIX& WorldMatrix)
 	Direct3D::pContext->VSSetConstantBuffers(0, 1, &pConstantBuffer_);	//頂点シェーダー用	
 	Direct3D::pContext->PSSetConstantBuffers(0, 1, &pConstantBuffer_);	//ピクセルシェーダー用
 	
-	Direct3D::pContext->DrawIndexed(6, 0, 0);
+	Direct3D::pContext->DrawIndexed(36, 0, 0);
 }
 
 void Quad::Release()
