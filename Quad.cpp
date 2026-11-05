@@ -10,22 +10,22 @@ Quad::Quad()
 {
 	vertices[0] = {XMVectorSet(-1.0f,  1.0f, 0.0f, 1.0f),   
 		           XMVectorSet(0,0,0,0),
-				   XMVectorSet(0, 0, -1, 1) };	// 四角形の頂点（左上）
+				   XMVectorSet(0, 0, -1, 0) };	// 四角形の頂点（左上）
 	vertices[1] = {XMVectorSet( 1.0f,  1.0f, 0.0f, 1.0f),   
 		           XMVectorSet(1, 0, 0, 0), 
-		           XMVectorSet(0, 0, -1, 1)};	// 四角形の頂点（右上）
+		           XMVectorSet(0, 0, -1, 0)};	// 四角形の頂点（右上）
 	vertices[2] = {XMVectorSet( 1.0f, -1.0f, 0.0f, 1.0f),   
 		           XMVectorSet(1, 1, 0, 0), 
-		           XMVectorSet(0, 0, -1, 1)};	// 四角形の頂点（右下）
+		           XMVectorSet(0, 0, -1, 0)};	// 四角形の頂点（右下）
 	vertices[3] = {XMVectorSet(-1.0f, -1.0f, 0.0f, 1.0f),   
 		           XMVectorSet(0, 1, 0, 0), 
-		           XMVectorSet(0, 0, -1, 1)};	// 四角形の頂点（左下）		
+		           XMVectorSet(0, 0, -1, 0)};	// 四角形の頂点（左下）
 }
 
 Quad::~Quad()
 {}
 
-void Quad::Initialize()
+void Quad::Initialize(const char* textureFileName)
 {
 	// 頂点データ用バッファの設定
 	D3D11_BUFFER_DESC bd_vertex;
@@ -70,7 +70,7 @@ void Quad::Initialize()
 
 	//テクスチャの読み込み
 	pTexture_ = new Texture;
-	HRESULT hr = pTexture_->Load("image.jpg");
+	HRESULT hr = pTexture_->Load(textureFileName);
 	if(FAILED(hr))
 	{
 		// エラーハンドリング
@@ -126,4 +126,10 @@ void Quad::Release()
 	if (pVertexBuffer_) { pVertexBuffer_->Release(); pVertexBuffer_ = nullptr; }
 	if (pIndexBuffer_) { pIndexBuffer_->Release(); pIndexBuffer_ = nullptr; }
 	if (pConstantBuffer_) { pConstantBuffer_->Release(); pConstantBuffer_ = nullptr; }
+	if (pTexture_)
+	{
+		pTexture_->Release();
+		delete pTexture_;
+		pTexture_ = nullptr;
+	}
 }

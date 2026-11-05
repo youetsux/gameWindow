@@ -26,9 +26,9 @@ class Quad
 
 public:
 	Quad();
-	~Quad();
+	virtual ~Quad();
 	// ‰Šú‰»
-	void Initialize();
+	void Initialize(const char* textureFileName = "image.jpg");
 	void Draw(XMMATRIX& WorldMatrix);
 	void Release();
 	VERTEX vertices[4]; // ’¸“_À•W

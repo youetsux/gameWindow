@@ -2,59 +2,59 @@
 
 namespace
 {
-	XMVECTOR DEF_POS{ 0, 3, -10, 0 };	//カメラの位置
-	XMVECTOR DEF_TGT{ 0, 0, 0, 0 };	//カメラの焦点
-	float DEF_FOV{ XM_PIDIV4 };	//視野角 4/π＝45度
-	float DEF_WIN_WIDTH{ 800.0f };	//ウィンドウの幅
-	float DEF_WIN_HEIGHT{ 600.0f };	//ウィンドウの高さ
-	float DEF_ASPECT{ DEF_WIN_WIDTH / DEF_WIN_HEIGHT };	//アスペクト比
-	float DEF_NEAR{ 0.1f };	//近くのクリップ面
-	float DEF_FAR{ 100.0f };	//遠くのクリップ面
-	XMVECTOR UP_DIR{ 0, 1, 0, 0 };	//上方向ベクトル
+	XMVECTOR DEF_POS{ 0, 3, -10, 0 };	//�J�����̈ʒu
+	XMVECTOR DEF_TGT{ 0, 0, 0, 0 };	//�J�����̏œ_
+	float DEF_FOV{ XM_PIDIV4 };	//����p 4/�΁�45�x
+	float DEF_WIN_WIDTH{ 800.0f };	//�E�B���h�E�̕�
+	float DEF_WIN_HEIGHT{ 600.0f };	//�E�B���h�E�̍���
+	float DEF_ASPECT{ DEF_WIN_WIDTH / DEF_WIN_HEIGHT };	//�A�X�y�N�g��
+	float DEF_NEAR{ 0.1f };	//�߂��̃N���b�v��
+	float DEF_FAR{ 100.0f };	//�����̃N���b�v��
+	XMVECTOR UP_DIR{ 0, 1, 0, 0 };	//������x�N�g��
  }
 
-//変数
-XMVECTOR position_;	//カメラの位置（視点）
-XMVECTOR target_;	//見る位置（焦点）
-XMMATRIX viewMatrix_;	//ビュー行列　4x4の行列
-XMMATRIX projMatrix_;	//プロジェクション行列 4x4の行列
+//�ϐ�
+XMVECTOR position_;	//�J�����̈ʒu�i���_�j
+XMVECTOR target_;	//����ʒu�i�œ_�j
+XMMATRIX viewMatrix_;	//�r���[�s��@4x4�̍s��
+XMMATRIX projMatrix_;	//�v���W�F�N�V�����s�� 4x4�̍s��
 
 
 
-//初期化
+//������
 void Camera::Initialize()
 {
-	position_ = DEF_POS;	//カメラの位置
-	target_ = DEF_TGT;	//カメラの焦点
-	projMatrix_ = XMMatrixPerspectiveFovLH(DEF_FOV, DEF_ASPECT, DEF_NEAR, DEF_FAR);	//射影行列
+	position_ = DEF_POS;	//�J�����̈ʒu
+	target_ = DEF_TGT;	//�J�����̏œ_
+	projMatrix_ = XMMatrixPerspectiveFovLH(DEF_FOV, DEF_ASPECT, DEF_NEAR, DEF_FAR);	//�ˉe�s��
 }
 
-//更新
+//�X�V
 void Camera::Update()
 {
-	//ビュー行列の作成
+	//�r���[�s��̍쐬
 	viewMatrix_ = XMMatrixLookAtLH(position_, target_, UP_DIR);
 }
 
-//位置を設定
+//�ʒu��ݒ�
 void Camera::SetPosition(XMVECTOR position)
 {
 	position_ = position;
 }
 
-//焦点を設定
+//�œ_��ݒ�
 void Camera::SetTarget(XMVECTOR target)
 {
 	target_ = target;
 }
 
-//ビュー行列を取得
+//�r���[�s����擾
 XMMATRIX Camera::GetViewMatrix()
 {
 	return viewMatrix_;
 }
 
-//プロジェクション行列を取得
+//�v���W�F�N�V�����s����擾
 XMMATRIX Camera::GetProjectionMatrix()
 {
 	return projMatrix_;

@@ -6,22 +6,22 @@ using namespace DirectX;
 
 namespace Camera
 {
-	//初期化（プロジェクション行列作成）
+	//�������i�v���W�F�N�V�����s��쐬�j
 	void Initialize();
 
-	//更新（ビュー行列作成）
+	//�X�V�i�r���[�s��쐬�j
 	void Update();
 
-	//視点（カメラの位置）を設定 XMFLOAT3 positionのほうがいいかもね。
+	//���_�i�J�����̈ʒu�j��ݒ� XMFLOAT3 position�̂ق������������ˁB
 	void SetPosition(XMVECTOR position);
 
-	//焦点（見る位置）を設定
+	//�œ_�i����ʒu�j��ݒ�
 	void SetTarget(XMVECTOR target);
 
-	//ビュー行列を取得
+	//�r���[�s����擾
 	XMMATRIX GetViewMatrix();
 
-	//プロジェクション行列を取得
+	//�v���W�F�N�V�����s����擾
 	XMMATRIX GetProjectionMatrix();
 };
 
