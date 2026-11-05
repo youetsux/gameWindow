@@ -70,6 +70,9 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <LocalDebuggerWorkingDirectory>$(ProjectDir)</LocalDebuggerWorkingDirectory>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -133,6 +136,7 @@
     <ClInclude Include="gameWindow.h" />
     <ClInclude Include="Quad.h" />
     <ClInclude Include="DiceFace.h" />
+    <ClInclude Include="Dice.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Texture.h" />
@@ -143,6 +147,7 @@
     <ClCompile Include="gameWindow.cpp" />
     <ClCompile Include="Quad.cpp" />
     <ClCompile Include="DiceFace.cpp" />
+    <ClCompile Include="Dice.cpp" />
     <ClCompile Include="Texture.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -151,6 +156,7 @@
   <ItemGroup>
     <Image Include="gameWindow.ico" />
     <Image Include="small.ico" />
+    <Image Include="sainome.png" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Simple3D.hlsl">

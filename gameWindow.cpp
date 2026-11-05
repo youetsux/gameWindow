@@ -11,7 +11,7 @@
 
 #include "Direct3D.h"
 #include "Camera.h"
-#include "Quad.h"
+#include "Dice.h"
 
 //#pragma comment(lib, "d3d11.lib")
 
@@ -25,7 +25,7 @@ namespace {
 	const int WINDOW_HEIGHT = 600;                          // ウィンドウの高さ
 	RECT WIN_RECT = { 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT }; // ウィンドウの矩形
 
-	Quad* quad = nullptr; // Quad クラスのインスタンスへのポインタ
+	Dice* dice = nullptr; // Dice クラスのインスタンスへのポインタ
 
 }
 
@@ -62,8 +62,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     MSG msg = {};
 
-	quad = new Quad(); // Quad クラスのインスタンスを作成
-	quad->Initialize(); // Quad クラスの初期化
+	dice = new Dice(); // Dice クラスのインスタンスを作成
+	dice->Initialize(); // Dice クラスの初期化
 
     // メイン メッセージ ループ:
     while (msg.message != WM_QUIT)
@@ -90,14 +90,16 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			XMMATRIX rotation = XMMatrixRotationY(rot); // 行列を回転行列に設定
 			XMMATRIX translation = XMMatrixTranslation(0, 0, 0); // 行列を平行移動行列に設定
 			transform = scale * rotation * translation; // ワールド行列に拡大縮小行列を適用
-			quad->Draw(transform); // Quad クラスの描画
+			dice->Draw(transform); // Dice クラスの描画
 			
 			rot += 0.01f; // 回転角度を更新
             Direct3D::EndDraw();   // 描画終了
 
 		}
     }
-	quad->Release(); // Quad クラスの解放
+	dice->Release();
+	delete dice;
+	dice = nullptr; // Dice クラスの解放
 	Direct3D::Release(); // Direct3D 11 の解放
 
     return (int) msg.wParam;
