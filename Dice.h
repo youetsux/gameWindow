@@ -1,6 +1,7 @@
 #pragma once
 #include "DiceFace.h"
 
+//クラスのコンポジット（合成）を使って、サイコロを表現する。
 class Dice
 {
 public:

@@ -13,12 +13,15 @@ namespace Direct3D
 	ID3D11DeviceContext* pContext = nullptr;		//デバイスコンテキスト
 	IDXGISwapChain* pSwapChain = nullptr;		//スワップチェイン
 	ID3D11RenderTargetView* pRenderTargetView = nullptr;	//レンダーターゲットビュー
-	//シェーダ関係の変数
-	ID3D11VertexShader* pVertexShader = nullptr;	//頂点シェーダーバイナリへのポインタ
-	ID3D11PixelShader* pPixelShader = nullptr;		//ピクセルシェーダーのバイナリへのポインタ
-	ID3D11InputLayout* pVertexLayout = nullptr;	//頂点インプットレイアウト
-	ID3D11RasterizerState* pRasterizerState = nullptr;	//ラスタライザー
-
+	struct SHADER_BUNDLE
+	{
+		//シェーダ関係の変数
+		ID3D11VertexShader* pVertexShader = nullptr;	//頂点シェーダーバイナリへのポインタ
+		ID3D11PixelShader* pPixelShader = nullptr;		//ピクセルシェーダーのバイナリへのポインタ
+		ID3D11InputLayout* pVertexLayout = nullptr;	//頂点インプットレイアウト
+		ID3D11RasterizerState* pRasterizerState = nullptr;	//ラスタライザー
+	};
+	SHADER_BUNDLE shaderBundle[SHADER_MAX];
 }
 
 
@@ -92,13 +95,22 @@ void Direct3D::Initialize(int width, int height, HWND hWnd)
 
 	InitShader();	//シェーダの初期化
 }
-
 void Direct3D::InitShader()
+{
+	InitShader3D();
+	//InitShader2D();
+}
+
+//HRESULT Direct3D::InitShader2D()
+//{
+//}
+
+HRESULT Direct3D::InitShader3D()
 {
 	// 頂点シェーダの作成（コンパイル）
 	ID3DBlob* pCompileVS = nullptr;
 	D3DCompileFromFile(L"Simple3D.hlsl", nullptr, nullptr, "VS", "vs_5_0", NULL, 0, &pCompileVS, NULL);
-	pDevice->CreateVertexShader(pCompileVS->GetBufferPointer(), pCompileVS->GetBufferSize(), NULL, &pVertexShader);
+	pDevice->CreateVertexShader(pCompileVS->GetBufferPointer(), pCompileVS->GetBufferSize(), NULL, &shaderBundle[SHADER_3D].pVertexShader);
 	
 	// ピクセルシェーダの作成（コンパイル）
 	ID3DBlob* pCompilePS = nullptr;
