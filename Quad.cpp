@@ -87,6 +87,8 @@ void Quad::Draw(XMMATRIX& WorldMatrix)
 	//XMMATRIX view = XMMatrixLookAtLH(position, target, XMVectorSet(0, 1, 0, 0));	//ビュー行列
 	//XMMATRIX proj = XMMatrixPerspectiveFovLH(XM_PIDIV4, 800.0f / 600.0f, 0.1f, 100.0f);//射影行列
 
+	Direct3D::SetShader(SHADER_3D);
+
 	CONSTANT_BUFFER cb;
 	cb.matWVP = XMMatrixTranspose(WorldMatrix * Camera::GetViewMatrix() * Camera::GetProjectionMatrix());
 	cb.matW = XMMatrixTranspose(WorldMatrix); //ワールド行列を転置してコンスタントバッファに渡す
