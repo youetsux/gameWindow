@@ -21,7 +21,7 @@ namespace Direct3D
 		ID3D11InputLayout* pVertexLayout = nullptr;	//頂点インプットレイアウト
 		ID3D11RasterizerState* pRasterizerState = nullptr;	//ラスタライザー
 	};
-	SHADER_BUNDLE shaderBundle[SHADER_MAX];
+	SHADER_BUNDLE shaderBundle[SHADER_MAX] = {};
 }
 
 
@@ -98,7 +98,7 @@ void Direct3D::Initialize(int width, int height, HWND hWnd)
 void Direct3D::InitShader()
 {
 	InitShader3D();
-	//InitShader2D();
+	InitShader2D();
 }
 
 //HRESULT Direct3D::InitShader2D()
@@ -219,10 +219,10 @@ HRESULT Direct3D::InitShader2D()
 void Direct3D::SetShader(SHADER_TYPE type)
 {
 	//それぞれをデバイスコンテキストにセット
-	pContext->VSSetShader(shaderBundle[SHADER_3D].pVertexShader, NULL, 0);	//頂点シェーダー
-	pContext->PSSetShader(shaderBundle[SHADER_3D].pPixelShader, NULL, 0);	//ピクセルシェーダー
-	pContext->IASetInputLayout(shaderBundle[SHADER_3D].pVertexLayout);	//頂点インプットレイアウト
-	pContext->RSSetState(shaderBundle[SHADER_3D].pRasterizerState);		//ラスタライザー
+	pContext->VSSetShader(shaderBundle[type].pVertexShader, NULL, 0);	//頂点シェーダー
+	pContext->PSSetShader(shaderBundle[type].pPixelShader, NULL, 0);	//ピクセルシェーダー
+	pContext->IASetInputLayout(shaderBundle[type].pVertexLayout);	//頂点インプットレイアウト
+	pContext->RSSetState(shaderBundle[type].pRasterizerState);		//ラスタライザー
 }
 
 void Direct3D::BeginDraw()
@@ -240,15 +240,18 @@ void Direct3D::EndDraw()
 
 void Direct3D::Release()
 {
-	if (shaderBundle[SHADER_3D].pRasterizerState) shaderBundle[SHADER_3D].pRasterizerState->Release();
-	if (shaderBundle[SHADER_3D].pVertexLayout) shaderBundle[SHADER_3D].pVertexLayout->Release();
-	if (shaderBundle[SHADER_3D].pPixelShader) shaderBundle[SHADER_3D].pPixelShader->Release();
-	if (shaderBundle[SHADER_3D].pVertexShader) shaderBundle[SHADER_3D].pVertexShader->Release();
+	// シェーダー関係の解放
+	for (int i = 0; i < SHADER_MAX; i++)
+	{
+		SAFE_RELEASE(shaderBundle[i].pRasterizerState);
+		SAFE_RELEASE(shaderBundle[i].pVertexLayout);
+		SAFE_RELEASE(shaderBundle[i].pPixelShader);
+		SAFE_RELEASE(shaderBundle[i].pVertexShader);
+	}
 
-	//解放処理
-	if (pRenderTargetView) pRenderTargetView->Release();
-	if (pSwapChain) pSwapChain->Release();
-	if (pContext) pContext->Release();
-	if (pDevice) pDevice->Release();
-
+	// Direct3D関係の解放
+	SAFE_RELEASE(pRenderTargetView);
+	SAFE_RELEASE(pSwapChain);
+	SAFE_RELEASE(pContext);
+	SAFE_RELEASE(pDevice);
 }

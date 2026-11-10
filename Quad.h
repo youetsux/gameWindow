@@ -28,8 +28,8 @@ public:
 	Quad();
 	virtual ~Quad();
 	// èâä˙âª
-	void Initialize(const char* textureFileName = "image.jpg");
-	void Draw(XMMATRIX& WorldMatrix);
+	virtual void Initialize(const char* textureFileName = "image.jpg");
+	virtual void Draw(XMMATRIX& WorldMatrix);
 	void Release();
 	VERTEX vertices[4]; // í∏ì_ç¿ïW
 private:

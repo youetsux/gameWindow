@@ -12,6 +12,7 @@
 #include "Direct3D.h"
 #include "Camera.h"
 #include "Dice.h"
+#include "Sprite.h"
 
 //#pragma comment(lib, "d3d11.lib")
 
@@ -26,7 +27,7 @@ namespace {
 	RECT WIN_RECT = { 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT }; // ウィンドウの矩形
 
 	Dice* dice = nullptr; // Dice クラスのインスタンスへのポインタ
-
+	Sprite* sprite = nullptr; // Sprite クラスのインスタンスへのポインタ
 }
 
 // このコード モジュールに含まれる関数の宣言を転送します:
@@ -65,6 +66,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	dice = new Dice(); // Dice クラスのインスタンスを作成
 	dice->Initialize(); // Dice クラスの初期化
 
+	sprite = new Sprite(L"sainome.png"); // Sprite クラスのインスタンスを作成
+
+	
+
     // メイン メッセージ ループ:
     while (msg.message != WM_QUIT)
     {
@@ -90,9 +95,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			XMMATRIX rotation = XMMatrixRotationY(rot); // 行列を回転行列に設定
 			XMMATRIX translation = XMMatrixTranslation(0, 0, 0); // 行列を平行移動行列に設定
 			transform = scale * rotation * translation; // ワールド行列に拡大縮小行列を適用
-			dice->Draw(transform); // Dice クラスの描画
+            dice->Draw(transform); // Dice クラスの描画
 			
-			rot += 0.01f; // 回転角度を更新
+			XMMATRIX sTr = XMMatrixIdentity(); // スプライトのワールド行列を単位行列に初期化
+			sprite->Draw(sTr); // Sprite クラスの描画
+			
+            rot += 0.01f; // 回転角度を更新
             Direct3D::EndDraw();   // 描画終了
 
 		}

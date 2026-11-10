@@ -138,6 +138,7 @@
     <ClInclude Include="DiceFace.h" />
     <ClInclude Include="Dice.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="Sprite.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Texture.h" />
   </ItemGroup>
@@ -148,6 +149,7 @@
     <ClCompile Include="Quad.cpp" />
     <ClCompile Include="DiceFace.cpp" />
     <ClCompile Include="Dice.cpp" />
+    <ClCompile Include="Sprite.cpp" />
     <ClCompile Include="Texture.cpp" />
   </ItemGroup>
   <ItemGroup>
