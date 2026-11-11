@@ -69,6 +69,7 @@ HRESULT Fbx::Load(const std::string& fileName)
 
     HRESULT hr = S_OK;
     hr = ReadVertices(meshNode);
+    if (SUCCEEDED(hr)) hr = ReadIndices(mesh);
 
     // 必要な値を自分のvectorへコピーした後で、ufbxのデータを解放する。
     ufbx_free_scene(scene);
@@ -102,6 +103,35 @@ HRESULT Fbx::ReadVertices(const ufbx_node* node)
         if (!std::isfinite(position.x) || !std::isfinite(position.y)
             || !std::isfinite(position.z)) return E_FAIL;
         vertices_[i].position = position;
+    }
+    return S_OK;
+}
+
+HRESULT Fbx::ReadIndices(const ufbx_mesh* mesh)
+{
+    if (mesh->faces.count == 0) return E_FAIL;
+    indices_.clear();
+
+    // モデラー側で三角形化してから出力したFBXを使う。
+    for (size_t faceIndex = 0; faceIndex < mesh->faces.count; faceIndex++)
+    {
+        ufbx_face face = mesh->faces.data[faceIndex];
+        if (face.num_indices != 3)
+        {
+            OutputDebugStringA("Export the FBX with triangulated faces.\n");
+            return E_FAIL;
+        }
+
+        // 1つの三角形を構成する、3個の頂点番号を順に取得する。
+        for (uint32_t corner = 0; corner < 3; corner++)
+        {
+            uint32_t cornerIndex = face.index_begin + corner;
+            if (cornerIndex >= mesh->vertex_indices.count) return E_FAIL;
+            // 面の角の番号を、位置の頂点番号に変換する。
+            uint32_t vertexIndex = mesh->vertex_indices.data[cornerIndex];
+            if (vertexIndex >= vertices_.size()) return E_FAIL;
+            indices_.push_back(vertexIndex);
+        }
     }
     return S_OK;
 }
