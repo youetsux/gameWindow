@@ -12,6 +12,7 @@ enum SHADER_TYPE
 {
 	SHADER_3D,
 	SHADER_2D,
+	SHADER_MODEL,
 	SHADER_MAX
 };
 
@@ -28,6 +29,7 @@ namespace Direct3D
 	//各シェーダの初期化
 	HRESULT InitShader3D();
 	HRESULT InitShader2D();
+	HRESULT InitShaderModel();
 	void SetShader(SHADER_TYPE type);
 	extern ID3D11Device* pDevice;	//デバイス
 	extern ID3D11DeviceContext* pContext; //デバイスコンテキスト

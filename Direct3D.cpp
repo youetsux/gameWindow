@@ -255,3 +255,53 @@ void Direct3D::Release()
 	SAFE_RELEASE(pContext);
 	SAFE_RELEASE(pDevice);
 }
+HRESULT Direct3D::InitShaderModel()
+{
+    ID3DBlob* code = nullptr;
+    ID3DBlob* errors = nullptr;
+    HRESULT hr = D3DCompileFromFile(L"SimpleModel.hlsl", nullptr, nullptr,
+        "VS", "vs_5_0", 0, 0, &code, &errors);
+    if (errors)
+    {
+        OutputDebugStringA(static_cast<const char*>(errors->GetBufferPointer()));
+        errors->Release();
+    }
+    if (FAILED(hr)) { if (code) code->Release(); return hr; }
+
+    hr = pDevice->CreateVertexShader(code->GetBufferPointer(), code->GetBufferSize(),
+        nullptr, &shaderBundle[SHADER_MODEL].pVertexShader);
+    if (FAILED(hr)) { code->Release(); return hr; }
+
+    // Fbx::VERTEXはXMFLOAT3が1つなので、12バイトの位置だけを読む。
+    D3D11_INPUT_ELEMENT_DESC layout[] = {
+        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,
+          0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+    };
+    hr = pDevice->CreateInputLayout(layout, 1, code->GetBufferPointer(),
+        code->GetBufferSize(), &shaderBundle[SHADER_MODEL].pVertexLayout);
+    code->Release();
+    code = nullptr;
+    if (FAILED(hr)) return hr;
+
+    errors = nullptr;
+    hr = D3DCompileFromFile(L"SimpleModel.hlsl", nullptr, nullptr,
+        "PS", "ps_5_0", 0, 0, &code, &errors);
+    if (errors)
+    {
+        OutputDebugStringA(static_cast<const char*>(errors->GetBufferPointer()));
+        errors->Release();
+    }
+    if (FAILED(hr)) { if (code) code->Release(); return hr; }
+    hr = pDevice->CreatePixelShader(code->GetBufferPointer(), code->GetBufferSize(),
+        nullptr, &shaderBundle[SHADER_MODEL].pPixelShader);
+    code->Release();
+    if (FAILED(hr)) return hr;
+
+    D3D11_RASTERIZER_DESC rasterizer = {};
+    rasterizer.FillMode = D3D11_FILL_SOLID;
+    // 形状確認の段階では両面描画。表裏とカリングの確認は次の段階で行う。
+    rasterizer.CullMode = D3D11_CULL_NONE;
+    rasterizer.DepthClipEnable = TRUE;
+    return pDevice->CreateRasterizerState(
+        &rasterizer, &shaderBundle[SHADER_MODEL].pRasterizerState);
+}

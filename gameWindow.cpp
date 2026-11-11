@@ -141,6 +141,13 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    UpdateWindow(hWnd);
 
    Direct3D::Initialize(windowWidth, windowHeight, hWnd); // Direct3D 11 の初期化
+   // この初期化はHRESULTを確認し、失敗時には描画を開始しない。
+   if (FAILED(Direct3D::InitShaderModel()))
+   {
+       MessageBoxW(hWnd, L"SimpleModel.hlslの初期化に失敗しました。", L"Shader", MB_OK);
+       Direct3D::Release();
+       return FALSE;
+   }
    Camera::Initialize(); // カメラの初期化
 
    return TRUE;
