@@ -201,4 +201,13 @@
     </PropertyGroup>
     <Error Condition="!Exists('packages\directxtex_desktop_win10.2026.5.8.1\build\native\directxtex_desktop_win10.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\directxtex_desktop_win10.2026.5.8.1\build\native\directxtex_desktop_win10.targets'))" />
   </Target>
+  <ItemGroup>
+    <ClInclude Include="Fbx.h" />
+    <ClInclude Include="ufbx.h" />
+    <ClCompile Include="Fbx.cpp" />
+    <ClCompile Include="ufbx.c">
+      <CompileAs>CompileAsC</CompileAs>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+  </ItemGroup>
 </Project>
