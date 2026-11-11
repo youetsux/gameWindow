@@ -68,6 +68,7 @@ HRESULT Fbx::Load(const std::string& fileName)
     OutputDebugStringA(message);
 
     HRESULT hr = S_OK;
+    hr = ReadVertices(meshNode);
 
     // 必要な値を自分のvectorへコピーした後で、ufbxのデータを解放する。
     ufbx_free_scene(scene);
@@ -80,6 +81,28 @@ HRESULT Fbx::Load(const std::string& fileName)
     sprintf_s(message, "Copied: vertices=%zu indices=%zu\n",
         vertices_.size(), indices_.size());
     OutputDebugStringA(message);
+    return S_OK;
+}
+
+HRESULT Fbx::ReadVertices(const ufbx_node* node)
+{
+    const ufbx_mesh* mesh = node->mesh;
+    if (mesh->num_vertices == 0) return E_FAIL;
+    vertices_.resize(mesh->num_vertices);
+
+    for (size_t i = 0; i < mesh->num_vertices; i++)
+    {
+        // FBX内の配置・回転・拡大率と、座標系・単位変換を位置へ反映する。
+        ufbx_vec3 p = ufbx_transform_position(
+            &node->geometry_to_world, mesh->vertices.data[i]);
+        DirectX::XMFLOAT3 position(
+            static_cast<float>(p.x),
+            static_cast<float>(p.y),
+            static_cast<float>(p.z));
+        if (!std::isfinite(position.x) || !std::isfinite(position.y)
+            || !std::isfinite(position.z)) return E_FAIL;
+        vertices_[i].position = position;
+    }
     return S_OK;
 }
 
