@@ -82,6 +82,9 @@ HRESULT Fbx::Load(const std::string& fileName)
     sprintf_s(message, "Copied: vertices=%zu indices=%zu\n",
         vertices_.size(), indices_.size());
     OutputDebugStringA(message);
+
+    hr = CreateBuffers();
+    if (FAILED(hr)) { Release(); return hr; }
     return S_OK;
 }
 
@@ -136,4 +139,51 @@ HRESULT Fbx::ReadIndices(const ufbx_mesh* mesh)
     return S_OK;
 }
 
-void Fbx::Draw(Transform&) {} // まだ描画しない
+HRESULT Fbx::CreateBuffers()
+{
+    if (!Direct3D::pDevice || vertices_.empty() || indices_.empty()) return E_FAIL;
+    // ByteWidthはUINTなので、キャストの前に収まるか確認する。
+    if (vertices_.size() > UINT_MAX / sizeof(VERTEX)
+        || indices_.size() > UINT_MAX / sizeof(uint32_t)) return E_FAIL;
+
+    D3D11_BUFFER_DESC desc = {};
+    desc.Usage = D3D11_USAGE_DEFAULT;
+    desc.ByteWidth = static_cast<UINT>(sizeof(VERTEX) * vertices_.size());
+    desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    D3D11_SUBRESOURCE_DATA data = {};
+    data.pSysMem = vertices_.data();
+    HRESULT hr = Direct3D::pDevice->CreateBuffer(&desc, &data, &pVertexBuffer_);
+    if (FAILED(hr)) return hr;
+
+    desc.ByteWidth = static_cast<UINT>(sizeof(uint32_t) * indices_.size());
+    desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+    data.pSysMem = indices_.data();
+    hr = Direct3D::pDevice->CreateBuffer(&desc, &data, &pIndexBuffer_);
+    if (FAILED(hr)) return hr;
+
+    desc.ByteWidth = sizeof(CONSTANT_BUFFER);
+    desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    return Direct3D::pDevice->CreateBuffer(&desc, nullptr, &pConstantBuffer_);
+}
+
+void Fbx::Draw(Transform& transform)
+{
+    // 読み込み失敗後や、まだLoadしていない場合は描かない。
+    if (!pVertexBuffer_ || !pIndexBuffer_ || !pConstantBuffer_) return;
+
+    Direct3D::SetShader(SHADER_MODEL);
+    CONSTANT_BUFFER cb = {};
+    cb.matWVP = DirectX::XMMatrixTranspose(
+        transform.GetWorldMatrix()
+        * Camera::GetViewMatrix()
+        * Camera::GetProjectionMatrix());
+    Direct3D::pContext->UpdateSubresource(pConstantBuffer_, 0, nullptr, &cb, 0, 0);
+
+    UINT stride = sizeof(VERTEX);
+    UINT offset = 0;
+    Direct3D::pContext->IASetVertexBuffers(0, 1, &pVertexBuffer_, &stride, &offset);
+    Direct3D::pContext->IASetIndexBuffer(pIndexBuffer_, DXGI_FORMAT_R32_UINT, 0);
+    Direct3D::pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    Direct3D::pContext->VSSetConstantBuffers(0, 1, &pConstantBuffer_);
+    Direct3D::pContext->DrawIndexed(static_cast<UINT>(indices_.size()), 0, 0);
+}
