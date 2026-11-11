@@ -1,12 +1,13 @@
-#pragma once
+ï»¿#pragma once
+#include "Transform.h"
 #include "Direct3D.h"
 #include <DirectXMath.h>
 #include <string>
 
 using namespace DirectX;
-class Texture;//‘O•ûéŒ¾
+class Texture;//å‰æ–¹å®£è¨€
 
-//ƒRƒ“ƒXƒ^ƒ“ƒgƒoƒbƒtƒ@[
+//ã‚³ãƒ³ã‚¹ã‚¿ãƒ³ãƒˆãƒãƒƒãƒ•ã‚¡ãƒ¼
 
 class Sprite
 {
@@ -17,22 +18,22 @@ public:
 	};
 
 
-	//’¸“_\‘¢‘Ì
+	//é ‚ç‚¹æ§‹é€ ä½“
 	struct VERTEX
 	{
-		XMVECTOR pos; // ’¸“_À•W (x, y, z, 1)
-		XMVECTOR uv; // ’¸“_UVÀ•W (u, v, 0, 0)
+		XMVECTOR pos; // é ‚ç‚¹åº§æ¨™ (x, y, z, 1)
+		XMVECTOR uv; // é ‚ç‚¹UVåº§æ¨™ (u, v, 0, 0)
 	};
 
 	//Sprite();
 	Sprite(const std::wstring& filename);
 	~Sprite();
-	void Draw(XMMATRIX& WorldMatrix);
+	void Draw(Transform& transform);
 private:
-	ID3D11Buffer* pVertexBuffer_;	//’¸“_ƒoƒbƒtƒ@
-	ID3D11Buffer* pIndexBuffer_;    //ƒCƒ“ƒfƒbƒNƒXƒoƒbƒtƒ@
-	ID3D11Buffer* pConstantBuffer_;	//ƒRƒ“ƒXƒ^ƒ“ƒgƒoƒbƒtƒ@
-	Texture* pTexture_; // ƒeƒNƒXƒ`ƒƒ
+	ID3D11Buffer* pVertexBuffer_;	//é ‚ç‚¹ãƒãƒƒãƒ•ã‚¡
+	ID3D11Buffer* pIndexBuffer_;    //ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ãƒãƒƒãƒ•ã‚¡
+	ID3D11Buffer* pConstantBuffer_;	//ã‚³ãƒ³ã‚¹ã‚¿ãƒ³ãƒˆãƒãƒƒãƒ•ã‚¡
+	Texture* pTexture_; // ãƒ†ã‚¯ã‚¹ãƒãƒ£
 
 	HRESULT InitBuffers();
 	void LoadTexture(const std::wstring& filename);

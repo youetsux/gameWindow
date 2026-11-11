@@ -1,4 +1,4 @@
-#include "Quad.h"
+ï»¿#include "Quad.h"
 #include "Camera.h"
 
 Quad::Quad()
@@ -10,16 +10,16 @@ Quad::Quad()
 {
 	vertices[0] = {XMVectorSet(-1.0f,  1.0f, 0.0f, 1.0f),   
 		           XMVectorSet(0,0,0,0),
-				   XMVectorSet(0, 0, -1, 0) };	// ŽlŠpŒ`‚Ì’¸“_i¶ãj
+				   XMVectorSet(0, 0, -1, 0) };	// å››è§’å½¢ã®é ‚ç‚¹ï¼ˆå·¦ä¸‹ï¼‰
 	vertices[1] = {XMVectorSet( 1.0f,  1.0f, 0.0f, 1.0f),   
 		           XMVectorSet(1, 0, 0, 0), 
-		           XMVectorSet(0, 0, -1, 0)};	// ŽlŠpŒ`‚Ì’¸“_i‰Eãj
+		           XMVectorSet(0, 0, -1, 0)};	// å››è§’å½¢ã®é ‚ç‚¹ï¼ˆå³ä¸‹ï¼‰
 	vertices[2] = {XMVectorSet( 1.0f, -1.0f, 0.0f, 1.0f),   
 		           XMVectorSet(1, 1, 0, 0), 
-		           XMVectorSet(0, 0, -1, 0)};	// ŽlŠpŒ`‚Ì’¸“_i‰E‰ºj
+		           XMVectorSet(0, 0, -1, 0)};	// å››è§’å½¢ã®é ‚ç‚¹ï¼ˆå³ä¸‹ï¼‰
 	vertices[3] = {XMVectorSet(-1.0f, -1.0f, 0.0f, 1.0f),   
 		           XMVectorSet(0, 1, 0, 0), 
-		           XMVectorSet(0, 0, -1, 0)};	// ŽlŠpŒ`‚Ì’¸“_i¶‰ºj
+		           XMVectorSet(0, 0, -1, 0)};	// å››è§’å½¢ã®é ‚ç‚¹ï¼ˆå·¦ä¸‹ï¼‰
 }
 
 Quad::~Quad()
@@ -27,21 +27,21 @@ Quad::~Quad()
 
 void Quad::Initialize(const char* textureFileName)
 {
-	// ’¸“_ƒf[ƒ^—pƒoƒbƒtƒ@‚ÌÝ’è
+	// é ‚ç‚¹ãƒ‡ãƒ¼ã‚¿ç”¨ãƒãƒƒãƒ•ã‚¡ã®è¨­å®š
 	D3D11_BUFFER_DESC bd_vertex;
-	bd_vertex.ByteWidth = sizeof(VERTEX) * 4; // ƒoƒbƒtƒ@‚ÌƒTƒCƒY
+	bd_vertex.ByteWidth = sizeof(VERTEX) * 4; // ãƒãƒƒãƒ•ã‚¡ã®ã‚µã‚¤ã‚º
 	bd_vertex.Usage = D3D11_USAGE_DEFAULT;
 	bd_vertex.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	bd_vertex.CPUAccessFlags = 0;
 	bd_vertex.MiscFlags = 0;
 	bd_vertex.StructureByteStride = 0;
 	D3D11_SUBRESOURCE_DATA data_vertex;
-	data_vertex.pSysMem = vertices;// ƒoƒbƒtƒ@‚ÉƒRƒs[‚·‚éƒf[ƒ^‚ÌƒAƒhƒŒƒX
+	data_vertex.pSysMem = vertices;// ãƒãƒƒãƒ•ã‚¡ã«ã‚³ãƒ”ãƒ¼ã™ã‚‹ãƒ‡ãƒ¼ã‚¿ã®ã‚¢ãƒ‰ãƒ¬ã‚¹
 	Direct3D::pDevice->CreateBuffer(&bd_vertex, &data_vertex, &pVertexBuffer_);
 
-	//ƒCƒ“ƒfƒbƒNƒXî•ñ
+	//ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹æƒ…å ±
 	int index[] = { 0,2,3, 0,1,2 };
-	// ƒCƒ“ƒfƒbƒNƒXƒoƒbƒtƒ@‚ð¶¬‚·‚é
+	// ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ãƒãƒƒãƒ•ã‚¡ã‚’ç”Ÿæˆã™ã‚‹
 	D3D11_BUFFER_DESC   bd;
 	bd.Usage = D3D11_USAGE_DEFAULT;
 	bd.ByteWidth = sizeof(index);
@@ -55,7 +55,7 @@ void Quad::Initialize(const char* textureFileName)
 	InitData.SysMemSlicePitch = 0;
 	Direct3D::pDevice->CreateBuffer(&bd, &InitData, &pIndexBuffer_);
 
-	//ƒRƒ“ƒXƒ^ƒ“ƒgƒoƒbƒtƒ@ì¬
+	//ã‚³ãƒ³ã‚¹ã‚¿ãƒ³ãƒˆãƒãƒƒãƒ•ã‚¡ä½œæˆ
 	D3D11_BUFFER_DESC cb;
 	cb.ByteWidth = sizeof(CONSTANT_BUFFER);
 	cb.Usage = D3D11_USAGE_DYNAMIC;
@@ -64,40 +64,42 @@ void Quad::Initialize(const char* textureFileName)
 	cb.MiscFlags = 0;
 	cb.StructureByteStride = 0;
 
-	// ƒRƒ“ƒXƒ^ƒ“ƒgƒoƒbƒtƒ@‚Ìì¬
+	// ã‚³ãƒ³ã‚¹ã‚¿ãƒ³ãƒˆãƒãƒƒãƒ•ã‚¡ã®ä½œæˆ
 	Direct3D::pDevice->CreateBuffer(&cb, nullptr, &pConstantBuffer_);
 
 
-	//ƒeƒNƒXƒ`ƒƒ‚Ì“Ç‚Ýž‚Ý
+	//ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®èª­ã¿è¾¼ã¿
 	pTexture_ = new Texture;
 	HRESULT hr = pTexture_->Load(textureFileName);
 	if(FAILED(hr))
 	{
-		// ƒGƒ‰[ƒnƒ“ƒhƒŠƒ“ƒO
+		// ã‚¨ãƒ©ãƒ¼ãƒãƒ³ãƒ‰ãƒªãƒ³ã‚°
 		return;
 	}
 
 }
 
-void Quad::Draw(XMMATRIX& WorldMatrix)
+void Quad::Draw(Transform& transform)
 {
-	////ƒRƒ“ƒXƒ^ƒ“ƒgƒoƒbƒtƒ@‚É“n‚·î•ñ
-	//XMVECTOR position = { 0, 3, -10, 0 };	//ƒJƒƒ‰‚ÌˆÊ’u
-	//XMVECTOR target = { 0, 0, 0, 0 };	//ƒJƒƒ‰‚ÌÅ“_
-	//XMMATRIX view = XMMatrixLookAtLH(position, target, XMVectorSet(0, 1, 0, 0));	//ƒrƒ…[s—ñ
-	//XMMATRIX proj = XMMatrixPerspectiveFovLH(XM_PIDIV4, 800.0f / 600.0f, 0.1f, 100.0f);//ŽË‰es—ñ
+	XMMATRIX WorldMatrix = transform.GetWorldMatrix();
+
+	////ã‚³ãƒ³ã‚¹ã‚¿ãƒ³ãƒˆãƒãƒƒãƒ•ã‚¡ã«æ¸¡ã™æƒ…å ±
+	//XMVECTOR position = { 0, 3, -10, 0 };	//ã‚«ãƒ¡ãƒ©ã®ä½ç½®
+	//XMVECTOR target = { 0, 0, 0, 0 };	//ã‚«ãƒ¡ãƒ©ã®ç„¦ç‚¹
+	//XMMATRIX view = XMMatrixLookAtLH(position, target, XMVectorSet(0, 1, 0, 0));	//ãƒ“ãƒ¥ãƒ¼è¡Œåˆ—
+	//XMMATRIX proj = XMMatrixPerspectiveFovLH(XM_PIDIV4, 800.0f / 600.0f, 0.1f, 100.0f);//å°„å½±è¡Œåˆ—
 
 	Direct3D::SetShader(SHADER_3D);
 
 	CONSTANT_BUFFER cb;
 	cb.matWVP = XMMatrixTranspose(WorldMatrix * Camera::GetViewMatrix() * Camera::GetProjectionMatrix());
-	cb.matW = XMMatrixTranspose(WorldMatrix); //ƒ[ƒ‹ƒhs—ñ‚ð“]’u‚µ‚ÄƒRƒ“ƒXƒ^ƒ“ƒgƒoƒbƒtƒ@‚É“n‚·
+	cb.matW = XMMatrixTranspose(WorldMatrix); //ãƒ¯ãƒ¼ãƒ«ãƒ‰è¡Œåˆ—ã‚’è»¢ç½®ã—ã¦ã‚³ãƒ³ã‚¹ã‚¿ãƒ³ãƒˆãƒãƒƒãƒ•ã‚¡ã«æ¸¡ã™
 
-	//ƒRƒ“ƒXƒ^ƒ“ƒgƒoƒbƒtƒ@‚Éƒf[ƒ^‚ð“]‘—‚·‚é
+	//ã‚³ãƒ³ã‚¹ã‚¿ãƒ³ãƒˆãƒãƒƒãƒ•ã‚¡ã«ãƒ‡ãƒ¼ã‚¿ã‚’è»¢é€ã™ã‚‹
 	D3D11_MAPPED_SUBRESOURCE pdata;
-	Direct3D::pContext->Map(pConstantBuffer_, 0, D3D11_MAP_WRITE_DISCARD, 0, &pdata);	// GPU‚©‚ç‚Ìƒf[ƒ^ƒAƒNƒZƒX‚ðŽ~‚ß‚é
-	memcpy_s(pdata.pData, pdata.RowPitch, (void*)(&cb), sizeof(cb));	// ƒf[ƒ^‚ð’l‚ð‘—‚é
-	Direct3D::pContext->Unmap(pConstantBuffer_, 0);	//ÄŠJ
+	Direct3D::pContext->Map(pConstantBuffer_, 0, D3D11_MAP_WRITE_DISCARD, 0, &pdata);	// GPUã‹ã‚‰ã®ãƒ‡ãƒ¼ã‚¿ã‚¢ã‚¯ã‚»ã‚¹ã‚’æ­¢ã‚ã‚‹
+	memcpy_s(pdata.pData, pdata.RowPitch, (void*)(&cb), sizeof(cb));	// ãƒ‡ãƒ¼ã‚¿ã‚’å€¤ã‚’é€ã‚‹
+	Direct3D::pContext->Unmap(pConstantBuffer_, 0);	//å†é–‹
 
 	ID3D11SamplerState* pSampler = pTexture_->GetSampler();
 	Direct3D::pContext->PSSetSamplers(0, 1, &pSampler);
@@ -106,19 +108,19 @@ void Quad::Draw(XMMATRIX& WorldMatrix)
 	Direct3D::pContext->PSSetShaderResources(0, 1, &pSRV);
 
 
-	//’¸“_ƒoƒbƒtƒ@
+	//é ‚ç‚¹ãƒãƒƒãƒ•ã‚¡
 	UINT stride = sizeof(VERTEX);
 	UINT offset = 0;
 	Direct3D::pContext->IASetVertexBuffers(0, 1, &pVertexBuffer_, &stride, &offset);
 
-	// ƒCƒ“ƒfƒbƒNƒXƒoƒbƒtƒ@[‚ðƒZƒbƒg
+	// ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ãƒãƒƒãƒ•ã‚¡ãƒ¼ã‚’ã‚»ãƒƒãƒˆ
 	stride = sizeof(int);
 	offset = 0;
 	Direct3D::pContext->IASetIndexBuffer(pIndexBuffer_, DXGI_FORMAT_R32_UINT, 0);
 
-	//ƒRƒ“ƒXƒ^ƒ“ƒgƒoƒbƒtƒ@
-	Direct3D::pContext->VSSetConstantBuffers(0, 1, &pConstantBuffer_);	//’¸“_ƒVƒF[ƒ_[—p	
-	Direct3D::pContext->PSSetConstantBuffers(0, 1, &pConstantBuffer_);	//ƒsƒNƒZƒ‹ƒVƒF[ƒ_[—p
+	//ã‚³ãƒ³ã‚¹ã‚¿ãƒ³ãƒˆãƒãƒƒãƒ•ã‚¡
+	Direct3D::pContext->VSSetConstantBuffers(0, 1, &pConstantBuffer_);	//é ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ç”¨	
+	Direct3D::pContext->PSSetConstantBuffers(0, 1, &pConstantBuffer_);	//ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ç”¨
 	
 	Direct3D::pContext->DrawIndexed(6, 0, 0);
 }

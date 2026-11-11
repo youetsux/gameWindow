@@ -1,14 +1,15 @@
-#pragma once
+ï»¿#pragma once
+#include "Transform.h"
 #include "DiceFace.h"
 
-//ƒNƒ‰ƒX‚ÌƒRƒ“ƒ|ƒWƒbƒgi‡¬j‚ğg‚Á‚ÄAƒTƒCƒRƒ‚ğ•\Œ»‚·‚éB
+//ã‚¯ãƒ©ã‚¹ã®ã‚³ãƒ³ãƒã‚¸ãƒƒãƒˆï¼ˆåˆæˆï¼‰ã‚’ä½¿ã£ã¦ã€ã‚µã‚¤ã‚³ãƒ­ã‚’è¡¨ç¾ã™ã‚‹ã€‚
 class Dice
 {
 public:
     void Initialize();
-    void Draw(XMMATRIX& worldMatrix);
+    void Draw(Transform& transform);
     void Release();
 
 private:
-    DiceFace faces_[6]; // ƒRƒ“ƒ|ƒWƒVƒ‡ƒ“F6–‡‚Ì–Ê‚ğ•”•i‚Æ‚µ‚Ä‚Â
+    DiceFace faces_[6]; // ã‚³ãƒ³ãƒã‚¸ã‚·ãƒ§ãƒ³ï¼š6æšã®é¢ã‚’éƒ¨å“ã¨ã—ã¦æŒã¤
 };

@@ -1,10 +1,10 @@
-#pragma once
-//ƒCƒ“ƒNƒ‹[ƒh
+ï»¿#pragma once
+//ã‚¤ãƒ³ã‚¯ãƒ«ãƒ¼ãƒ‰
 #include <d3d11.h>
 #define SAFE_DELETE(p) if(p != nullptr){ delete p; p = nullptr;}
 #define SAFE_RELEASE(p) if(p != nullptr){ p->Release(); p = nullptr;}
 
-//ƒŠƒ“ƒJ
+//ãƒªãƒ³ã‚«
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "d3dcompiler.lib")
 
@@ -16,19 +16,19 @@ enum SHADER_TYPE
 };
 
 
-//Shadebundle‚ğì‚Á‚ÄAInitShader3D‚É“K—p‚µ‚½‚Æ‚±‚ë‚Ü‚Åi11/5)
+//Shadebundleã‚’ä½œã£ã¦ã€InitShader3Dã«é©ç”¨ã—ãŸã¨ã“ã‚ã¾ã§ï¼ˆ11/5)
 namespace Direct3D
 {
 	void Initialize(int width, int height, HWND hWnd);
 	void BeginDraw();
 	void EndDraw();
 	void Release();
-	//ƒVƒF[ƒ_‚Ì‰Šú‰»ˆ—
+	//ã‚·ã‚§ãƒ¼ãƒ€ã®åˆæœŸåŒ–å‡¦ç†
 	void InitShader();
-	//ŠeƒVƒF[ƒ_‚Ì‰Šú‰»
+	//å„ã‚·ã‚§ãƒ¼ãƒ€ã®åˆæœŸåŒ–
 	HRESULT InitShader3D();
 	HRESULT InitShader2D();
 	void SetShader(SHADER_TYPE type);
-	extern ID3D11Device* pDevice;	//ƒfƒoƒCƒX
-	extern ID3D11DeviceContext* pContext; //ƒfƒoƒCƒXƒRƒ“ƒeƒLƒXƒg
+	extern ID3D11Device* pDevice;	//ãƒ‡ãƒã‚¤ã‚¹
+	extern ID3D11DeviceContext* pContext; //ãƒ‡ãƒã‚¤ã‚¹ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
 }

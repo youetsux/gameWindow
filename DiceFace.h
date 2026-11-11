@@ -1,16 +1,16 @@
-#pragma once
+﻿#pragma once
 #include "Quad.h"
 
 class DiceFace : public Quad
 {
 public:
-    // ���_�̏��Ԃ� Quad �Ɠ����F����A�E��A�E���A�����B
-    // �e�ʂ��O�����猩�����ԂŎw�肷��B
+    // 頂点の順番は Quad と同じ：左上、右上、右下、左下。
+    // 各面を外側から見た順番で指定する。
     void SetPositions(const XMFLOAT3 (&positions)[4]);
 
-    // �e�N�X�`������؂�o�������`�͈̔͂��w�肷��B
+    // テクスチャから切り出す長方形の範囲を指定する。
     void SetUV(float left, float top, float right, float bottom);
 
-    // 4���_�ɋ��ʂ̖@����ݒ肷��B����1�̃x�N�g����n���B
+    // 4頂点に共通の法線を設定する。長さ1のベクトルを渡す。
     void SetNormal(float x, float y, float z);
 };

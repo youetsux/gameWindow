@@ -1,11 +1,12 @@
-#pragma once
+ï»¿#pragma once
+#include "Transform.h"
 #include "Direct3D.h"
 #include <DirectXMath.h>
 #include "Texture.h"
 
 using namespace DirectX;
 
-//ƒRƒ“ƒXƒ^ƒ“ƒgƒoƒbƒtƒ@[
+//ã‚³ãƒ³ã‚¹ã‚¿ãƒ³ãƒˆãƒãƒƒãƒ•ã‚¡ãƒ¼
 struct CONSTANT_BUFFER
 {
 	XMMATRIX	matWVP;
@@ -13,12 +14,12 @@ struct CONSTANT_BUFFER
 };
 
 
-//’¸“_\‘¢‘Ì
+//é ‚ç‚¹æ§‹é€ ä½“
 struct VERTEX
 {
-	XMVECTOR pos; // ’¸“_À•W (x, y, z, 1)
-	XMVECTOR uv; // ’¸“_UVÀ•W (u, v, 0, 0)
-	XMVECTOR normal; // ’¸“_–@üƒxƒNƒgƒ‹ (x, y, z, 0)
+	XMVECTOR pos; // é ‚ç‚¹åº§æ¨™ (x, y, z, 1)
+	XMVECTOR uv; // é ‚ç‚¹UVåº§æ¨™ (u, v, 0, 0)
+	XMVECTOR normal; // é ‚ç‚¹æ³•ç·šãƒ™ã‚¯ãƒˆãƒ« (x, y, z, 0)
 };
 
 class Quad
@@ -27,15 +28,15 @@ class Quad
 public:
 	Quad();
 	virtual ~Quad();
-	// ‰Šú‰»
+	// åˆæœŸåŒ–
 	virtual void Initialize(const char* textureFileName = "image.jpg");
-	virtual void Draw(XMMATRIX& WorldMatrix);
+	virtual void Draw(Transform& transform);
 	void Release();
-	VERTEX vertices[4]; // ’¸“_À•W
+	VERTEX vertices[4]; // é ‚ç‚¹åº§æ¨™
 private:
-	ID3D11Buffer* pVertexBuffer_;	//’¸“_ƒoƒbƒtƒ@
-	ID3D11Buffer* pIndexBuffer_;    //ƒCƒ“ƒfƒbƒNƒXƒoƒbƒtƒ@
-	ID3D11Buffer* pConstantBuffer_;	//ƒRƒ“ƒXƒ^ƒ“ƒgƒoƒbƒtƒ@
-	Texture* pTexture_; // ƒeƒNƒXƒ`ƒƒ
+	ID3D11Buffer* pVertexBuffer_;	//é ‚ç‚¹ãƒãƒƒãƒ•ã‚¡
+	ID3D11Buffer* pIndexBuffer_;    //ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ãƒãƒƒãƒ•ã‚¡
+	ID3D11Buffer* pConstantBuffer_;	//ã‚³ãƒ³ã‚¹ã‚¿ãƒ³ãƒˆãƒãƒƒãƒ•ã‚¡
+	Texture* pTexture_; // ãƒ†ã‚¯ã‚¹ãƒãƒ£
 };
 

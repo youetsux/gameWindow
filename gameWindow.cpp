@@ -1,4 +1,4 @@
-// gameWindow.cpp : ƒAƒvƒŠƒP[ƒVƒ‡ƒ“‚ÌƒGƒ“ƒgƒŠ ƒ|ƒCƒ“ƒg‚ð’è‹`‚µ‚Ü‚·B
+ï»¿// gameWindow.cpp : ã‚¢ãƒ—ãƒªã‚±ãƒ¼ã‚·ãƒ§ãƒ³ã®ã‚¨ãƒ³ãƒˆãƒª ãƒã‚¤ãƒ³ãƒˆã‚’å®šç¾©ã—ã¾ã™ã€‚
 //
 
 #include "framework.h"
@@ -13,24 +13,25 @@
 #include "Camera.h"
 #include "Dice.h"
 #include "Sprite.h"
+#include "Transform.h"
 
 //#pragma comment(lib, "d3d11.lib")
 
 namespace {
   
-    // ƒOƒ[ƒoƒ‹•Ï”:
-    HINSTANCE hInst;                                // Œ»Ý‚ÌƒCƒ“ƒ^[ƒtƒFƒCƒX
-    WCHAR szTitle[MAX_LOADSTRING];                  // ƒ^ƒCƒgƒ‹ ƒo[‚ÌƒeƒLƒXƒg
-    WCHAR szWindowClass[MAX_LOADSTRING];            // ƒƒCƒ“ ƒEƒBƒ“ƒhƒE ƒNƒ‰ƒX–¼
-	const int WINDOW_WIDTH = 800;                          // ƒEƒBƒ“ƒhƒE‚Ì•
-	const int WINDOW_HEIGHT = 600;                          // ƒEƒBƒ“ƒhƒE‚Ì‚‚³
-	RECT WIN_RECT = { 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT }; // ƒEƒBƒ“ƒhƒE‚Ì‹éŒ`
+    // ã‚°ãƒ­ãƒ¼ãƒãƒ«å¤‰æ•°:
+    HINSTANCE hInst;                                // ç¾åœ¨ã®ã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ã‚¤ã‚¹
+    WCHAR szTitle[MAX_LOADSTRING];                  // ã‚¿ã‚¤ãƒˆãƒ« ãƒãƒ¼ã®ãƒ†ã‚­ã‚¹ãƒˆ
+    WCHAR szWindowClass[MAX_LOADSTRING];            // ãƒ¡ã‚¤ãƒ³ ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ ã‚¯ãƒ©ã‚¹å
+	const int WINDOW_WIDTH = 800;                          // ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã®å¹…
+	const int WINDOW_HEIGHT = 600;                          // ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã®é«˜ã•
+	RECT WIN_RECT = { 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT }; // ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã®çŸ©å½¢
 
-	Dice* dice = nullptr; // Dice ƒNƒ‰ƒX‚ÌƒCƒ“ƒXƒ^ƒ“ƒX‚Ö‚Ìƒ|ƒCƒ“ƒ^
-	Sprite* sprite = nullptr; // Sprite ƒNƒ‰ƒX‚ÌƒCƒ“ƒXƒ^ƒ“ƒX‚Ö‚Ìƒ|ƒCƒ“ƒ^
+	Dice* dice = nullptr; // Dice ã‚¯ãƒ©ã‚¹ã®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã¸ã®ãƒã‚¤ãƒ³ã‚¿
+	Sprite* sprite = nullptr; // Sprite ã‚¯ãƒ©ã‚¹ã®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã¸ã®ãƒã‚¤ãƒ³ã‚¿
 }
 
-// ‚±‚ÌƒR[ƒh ƒ‚ƒWƒ…[ƒ‹‚ÉŠÜ‚Ü‚ê‚éŠÖ”‚ÌéŒ¾‚ð“]‘—‚µ‚Ü‚·:
+// ã“ã®ã‚³ãƒ¼ãƒ‰ ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã«å«ã¾ã‚Œã‚‹é–¢æ•°ã®å®£è¨€ã‚’è»¢é€ã—ã¾ã™:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
@@ -44,15 +45,15 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
-    // TODO: ‚±‚±‚ÉƒR[ƒh‚ð‘}“ü‚µ‚Ä‚­‚¾‚³‚¢B
+    // TODO: ã“ã“ã«ã‚³ãƒ¼ãƒ‰ã‚’æŒ¿å…¥ã—ã¦ãã ã•ã„ã€‚
 
-    // ƒOƒ[ƒoƒ‹•¶Žš—ñ‚ð‰Šú‰»‚·‚é
+    // ã‚°ãƒ­ãƒ¼ãƒãƒ«æ–‡å­—åˆ—ã‚’åˆæœŸåŒ–ã™ã‚‹
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
     LoadStringW(hInstance, IDC_GAMEWINDOW, szWindowClass, MAX_LOADSTRING);
     MyRegisterClass(hInstance);
 
 
-    // ƒAƒvƒŠƒP[ƒVƒ‡ƒ“‰Šú‰»‚ÌŽÀs:
+    // ã‚¢ãƒ—ãƒªã‚±ãƒ¼ã‚·ãƒ§ãƒ³åˆæœŸåŒ–ã®å®Ÿè¡Œ:
     if (!InitInstance (hInstance, nCmdShow))
     {
         return FALSE;
@@ -63,14 +64,24 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     MSG msg = {};
 
-	dice = new Dice(); // Dice ƒNƒ‰ƒX‚ÌƒCƒ“ƒXƒ^ƒ“ƒX‚ðì¬
-	dice->Initialize(); // Dice ƒNƒ‰ƒX‚Ì‰Šú‰»
+	dice = new Dice(); // Dice ã‚¯ãƒ©ã‚¹ã®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã‚’ä½œæˆ
+	dice->Initialize(); // Dice ã‚¯ãƒ©ã‚¹ã®åˆæœŸåŒ–
 
-	sprite = new Sprite(L"sainome.png"); // Sprite ƒNƒ‰ƒX‚ÌƒCƒ“ƒXƒ^ƒ“ƒX‚ðì¬
+	sprite = new Sprite(L"sainome.png"); // Sprite ã‚¯ãƒ©ã‚¹ã®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã‚’ä½œæˆ
 
 	
 
-    // ƒƒCƒ“ ƒƒbƒZ[ƒW ƒ‹[ƒv:
+    Transform diceTransform;
+    diceTransform.position_ = XMFLOAT3(-1.5f, 0.0f, 0.0f);
+    diceTransform.rotate_ = XMFLOAT3(20.0f, 30.0f, 0.0f);
+    diceTransform.scale_ = XMFLOAT3(0.8f, 0.8f, 0.8f);
+
+    Transform spriteTransform;
+    spriteTransform.position_ = XMFLOAT3(0.55f, 0.55f, 0.0f);
+    spriteTransform.rotate_ = XMFLOAT3(0.0f, 0.0f, 15.0f);
+    spriteTransform.scale_ = XMFLOAT3(0.2f, 0.2f, 1.0f);
+
+    // ãƒ¡ã‚¤ãƒ³ ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ ãƒ«ãƒ¼ãƒ—:
     while (msg.message != WM_QUIT)
     {
 		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
@@ -80,35 +91,27 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		}
 		else
 		{
-            static float rot = 0.0f;
-			Camera::Update(); // ƒJƒƒ‰‚ÌXV
+            Camera::SetPosition(XMVectorSet(0, 3, -10, 0)); //ã‚«ãƒ¡ãƒ©ã®ä½ç½®
+            Camera::SetTarget(XMVectorSet(0, 0, 0, 0));    //ã‚«ãƒ¡ãƒ©ã®ç„¦ç‚¹
+            Camera::Update();
 
-            Camera::SetPosition(XMVectorSet(0, 3, -10, 0));	//ƒJƒƒ‰‚ÌˆÊ’u
-            Camera::SetTarget(XMVectorSet(0, 0, 0, 0));	//ƒJƒƒ‰‚ÌÅ“_
+            // è§’åº¦ã¯åº¦ã§æŒ‡å®šã™ã‚‹ã€‚å€¤ã‚’æ›´æ–°ã—ã¦ã‹ã‚‰è¡Œåˆ—ã‚’è¨ˆç®—ã™ã‚‹ã€‚
+            diceTransform.rotate_.y += 0.5f;
+            spriteTransform.rotate_.z += 0.5f;
+            diceTransform.Calculation();
+            spriteTransform.Calculation();
 
-			Direct3D::BeginDraw(); // •`‰æŠJŽn  
-            //ƒQ[ƒ€ƒƒWƒbƒN‚ð‚±‚±‚É‘‚­‚æ
-			//ƒ[ƒ‹ƒhƒ}ƒgƒŠƒNƒX@W=SRT@Scale*Rotation*Translation
-            //Rotation=Rz*Rx*Ry (ƒ[ƒ‹ƒsƒbƒ`ƒˆ[‚Ì‡j
-			XMMATRIX transform = XMMatrixIdentity(); // ƒ[ƒ‹ƒhs—ñ‚ð’PˆÊs—ñ‚É‰Šú‰»
-			XMMATRIX scale = XMMatrixScaling(1, 1, 1); // s—ñ‚ðŠg‘åk¬s—ñ‚ÉÝ’è
-			XMMATRIX rotation = XMMatrixRotationY(rot); // s—ñ‚ð‰ñ“]s—ñ‚ÉÝ’è
-			XMMATRIX translation = XMMatrixTranslation(0, 0, 0); // s—ñ‚ð•½sˆÚ“®s—ñ‚ÉÝ’è
-			transform = scale * rotation * translation; // ƒ[ƒ‹ƒhs—ñ‚ÉŠg‘åk¬s—ñ‚ð“K—p
-            dice->Draw(transform); // Dice ƒNƒ‰ƒX‚Ì•`‰æ
-			
-			XMMATRIX sTr = XMMatrixIdentity(); // ƒXƒvƒ‰ƒCƒg‚Ìƒ[ƒ‹ƒhs—ñ‚ð’PˆÊs—ñ‚É‰Šú‰»
-			sprite->Draw(sTr); // Sprite ƒNƒ‰ƒX‚Ì•`‰æ
-			
-            rot += 0.01f; // ‰ñ“]Šp“x‚ðXV
-            Direct3D::EndDraw();   // •`‰æI—¹
+            Direct3D::BeginDraw();
+            dice->Draw(diceTransform);
+            sprite->Draw(spriteTransform);
+            Direct3D::EndDraw();   // æç”»çµ‚äº†
 
 		}
     }
 	dice->Release();
 	delete dice;
-	dice = nullptr; // Dice ƒNƒ‰ƒX‚Ì‰ð•ú
-	Direct3D::Release(); // Direct3D 11 ‚Ì‰ð•ú
+	dice = nullptr; // Dice ã‚¯ãƒ©ã‚¹ã®è§£æ”¾
+	Direct3D::Release(); // Direct3D 11 ã®è§£æ”¾
 
     return (int) msg.wParam;
 }
@@ -116,9 +119,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 
 //
-//  ŠÖ”: MyRegisterClass()
+//  é–¢æ•°: MyRegisterClass()
 //
-//  –Ú“I: ƒEƒBƒ“ƒhƒE ƒNƒ‰ƒX‚ð“o˜^‚µ‚Ü‚·B
+//  ç›®çš„: ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ ã‚¯ãƒ©ã‚¹ã‚’ç™»éŒ²ã—ã¾ã™ã€‚
 //
 ATOM MyRegisterClass(HINSTANCE hInstance)
 {
@@ -142,21 +145,21 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 }
 
 //
-//   ŠÖ”: InitInstance(HINSTANCE, int)
+//   é–¢æ•°: InitInstance(HINSTANCE, int)
 //
-//   –Ú“I: ƒCƒ“ƒXƒ^ƒ“ƒX ƒnƒ“ƒhƒ‹‚ð•Û‘¶‚µ‚ÄAƒƒCƒ“ ƒEƒBƒ“ƒhƒE‚ðì¬‚µ‚Ü‚·
+//   ç›®çš„: ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ ãƒãƒ³ãƒ‰ãƒ«ã‚’ä¿å­˜ã—ã¦ã€ãƒ¡ã‚¤ãƒ³ ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚’ä½œæˆã—ã¾ã™
 //
-//   ƒRƒƒ“ƒg:
+//   ã‚³ãƒ¡ãƒ³ãƒˆ:
 //
-//        ‚±‚ÌŠÖ”‚ÅAƒOƒ[ƒoƒ‹•Ï”‚ÅƒCƒ“ƒXƒ^ƒ“ƒX ƒnƒ“ƒhƒ‹‚ð•Û‘¶‚µA
-//        ƒƒCƒ“ ƒvƒƒOƒ‰ƒ€ ƒEƒBƒ“ƒhƒE‚ðì¬‚¨‚æ‚Ñ•\Ž¦‚µ‚Ü‚·B
+//        ã“ã®é–¢æ•°ã§ã€ã‚°ãƒ­ãƒ¼ãƒãƒ«å¤‰æ•°ã§ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ ãƒãƒ³ãƒ‰ãƒ«ã‚’ä¿å­˜ã—ã€
+//        ãƒ¡ã‚¤ãƒ³ ãƒ—ãƒ­ã‚°ãƒ©ãƒ  ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚’ä½œæˆãŠã‚ˆã³è¡¨ç¤ºã—ã¾ã™ã€‚
 //
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
-   hInst = hInstance; // ƒOƒ[ƒoƒ‹•Ï”‚ÉƒCƒ“ƒXƒ^ƒ“ƒX ƒnƒ“ƒhƒ‹‚ðŠi”[‚·‚é
-   AdjustWindowRect(&WIN_RECT, WS_OVERLAPPEDWINDOW, FALSE); // ƒEƒBƒ“ƒhƒE‚Ì‹éŒ`‚ð’²®‚·‚é
-   int windowWidth = WIN_RECT.right - WIN_RECT.left; // ’²®Œã‚ÌƒEƒBƒ“ƒhƒE‚Ì•‚ðŒvŽZ‚·‚é
-   int windowHeight = WIN_RECT.bottom - WIN_RECT.top; // ’²®Œã‚ÌƒEƒBƒ“ƒhƒE‚Ì‚‚³‚ðŒvŽZ‚·‚é
+   hInst = hInstance; // ã‚°ãƒ­ãƒ¼ãƒãƒ«å¤‰æ•°ã«ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ ãƒãƒ³ãƒ‰ãƒ«ã‚’æ ¼ç´ã™ã‚‹
+   AdjustWindowRect(&WIN_RECT, WS_OVERLAPPEDWINDOW, FALSE); // ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã®çŸ©å½¢ã‚’èª¿æ•´ã™ã‚‹
+   int windowWidth = WIN_RECT.right - WIN_RECT.left; // èª¿æ•´å¾Œã®ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã®å¹…ã‚’è¨ˆç®—ã™ã‚‹
+   int windowHeight = WIN_RECT.bottom - WIN_RECT.top; // èª¿æ•´å¾Œã®ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã®é«˜ã•ã‚’è¨ˆç®—ã™ã‚‹
    
    HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
       0, 0, windowWidth, windowHeight, nullptr, nullptr, hInstance, nullptr);
@@ -169,20 +172,20 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    ShowWindow(hWnd, nCmdShow);
    UpdateWindow(hWnd);
 
-   Direct3D::Initialize(windowWidth, windowHeight, hWnd); // Direct3D 11 ‚Ì‰Šú‰»
-   Camera::Initialize(); // ƒJƒƒ‰‚Ì‰Šú‰»
+   Direct3D::Initialize(windowWidth, windowHeight, hWnd); // Direct3D 11 ã®åˆæœŸåŒ–
+   Camera::Initialize(); // ã‚«ãƒ¡ãƒ©ã®åˆæœŸåŒ–
 
    return TRUE;
 }
 
 //
-//  ŠÖ”: WndProc(HWND, UINT, WPARAM, LPARAM)
+//  é–¢æ•°: WndProc(HWND, UINT, WPARAM, LPARAM)
 //
-//  –Ú“I: ƒƒCƒ“ ƒEƒBƒ“ƒhƒE‚ÌƒƒbƒZ[ƒW‚ðˆ—‚µ‚Ü‚·B
+//  ç›®çš„: ãƒ¡ã‚¤ãƒ³ ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã®ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã‚’å‡¦ç†ã—ã¾ã™ã€‚
 //
-//  WM_COMMAND  - ƒAƒvƒŠƒP[ƒVƒ‡ƒ“ ƒƒjƒ…[‚Ìˆ—
-//  WM_PAINT    - ƒƒCƒ“ ƒEƒBƒ“ƒhƒE‚ð•`‰æ‚·‚é
-//  WM_DESTROY  - ’†Ž~ƒƒbƒZ[ƒW‚ð•\Ž¦‚µ‚Ä–ß‚é
+//  WM_COMMAND  - ã‚¢ãƒ—ãƒªã‚±ãƒ¼ã‚·ãƒ§ãƒ³ ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã®å‡¦ç†
+//  WM_PAINT    - ãƒ¡ã‚¤ãƒ³ ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚’æç”»ã™ã‚‹
+//  WM_DESTROY  - ä¸­æ­¢ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã‚’è¡¨ç¤ºã—ã¦æˆ»ã‚‹
 //
 //
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -192,7 +195,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_COMMAND:
         {
             int wmId = LOWORD(wParam);
-            // ‘I‘ð‚³‚ê‚½ƒƒjƒ…[‚Ì‰ðÍ:
+            // é¸æŠžã•ã‚ŒãŸãƒ¡ãƒ‹ãƒ¥ãƒ¼ã®è§£æž:
             switch (wmId)
             {
             case IDM_ABOUT:
@@ -210,7 +213,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         {
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hWnd, &ps);
-            // TODO: HDC ‚ðŽg—p‚·‚é•`‰æƒR[ƒh‚ð‚±‚±‚É’Ç‰Á‚µ‚Ä‚­‚¾‚³‚¢...
+            // TODO: HDC ã‚’ä½¿ç”¨ã™ã‚‹æç”»ã‚³ãƒ¼ãƒ‰ã‚’ã“ã“ã«è¿½åŠ ã—ã¦ãã ã•ã„...
             EndPaint(hWnd, &ps);
         }
         break;
@@ -223,7 +226,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     return 0;
 }
 
-// ƒo[ƒWƒ‡ƒ“î•ñƒ{ƒbƒNƒX‚ÌƒƒbƒZ[ƒW ƒnƒ“ƒhƒ‰[‚Å‚·B
+// ãƒãƒ¼ã‚¸ãƒ§ãƒ³æƒ…å ±ãƒœãƒƒã‚¯ã‚¹ã®ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ ãƒãƒ³ãƒ‰ãƒ©ãƒ¼ã§ã™ã€‚
 INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
     UNREFERENCED_PARAMETER(lParam);

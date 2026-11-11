@@ -1,4 +1,4 @@
-#include "DiceFace.h"
+﻿#include "DiceFace.h"
 
 void DiceFace::SetPositions(const XMFLOAT3 (&positions)[4])
 {

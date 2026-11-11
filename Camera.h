@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Direct3D.h"
 #include <DirectXMath.h>
 
@@ -6,22 +6,22 @@ using namespace DirectX;
 
 namespace Camera
 {
-	//�������i�v���W�F�N�V�����s��쐬�j
+	//初期化（プロジェクション行列作成）
 	void Initialize();
 
-	//�X�V�i�r���[�s��쐬�j
+	//更新（ビュー行列作成）
 	void Update();
 
-	//���_�i�J�����̈ʒu�j��ݒ� XMFLOAT3 position�̂ق������������ˁB
+	//視点（カメラの位置）を設定 XMFLOAT3 positionのほうがいいかもね。
 	void SetPosition(XMVECTOR position);
 
-	//�œ_�i����ʒu�j��ݒ�
+	//焦点（見る位置）を設定
 	void SetTarget(XMVECTOR target);
 
-	//�r���[�s����擾
+	//ビュー行列を取得
 	XMMATRIX GetViewMatrix();
 
-	//�v���W�F�N�V�����s����擾
+	//プロジェクション行列を取得
 	XMMATRIX GetProjectionMatrix();
 };
 

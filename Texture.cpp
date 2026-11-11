@@ -1,18 +1,18 @@
-#include "Texture.h"
+ï»¿#include "Texture.h"
 #include <DirectXTex.h>
 #include "Direct3D.h"
 
-// DirectXTex‚Ìƒ‰ƒCƒuƒ‰ƒŠ‚ğƒŠƒ“ƒN(”ñ„§‚¾‚ªŠÈ’P)
+// DirectXTexã®ãƒ©ã‚¤ãƒ–ãƒ©ãƒªã‚’ãƒªãƒ³ã‚¯(éæ¨å¥¨ã ãŒç°¡å˜)
 #pragma comment(lib, "DirectXTex.lib")
 
 using namespace DirectX;
 
 namespace {
-	// std::wstring‚ğ•Ô‹p‚·‚é‚æ‚¤‚É•ÏXiƒƒ‚ƒŠˆÀ‘Sj
+	// std::wstringã‚’è¿”å´ã™ã‚‹ã‚ˆã†ã«å¤‰æ›´ï¼ˆãƒ¡ãƒ¢ãƒªå®‰å…¨ï¼‰
 	std::wstring StringToWString(const std::string& str) {
 		if (str.empty()) return L"";
 
-		// •K—v‚Èƒoƒbƒtƒ@ƒTƒCƒY‚ğæ“¾
+		// å¿…è¦ãªãƒãƒƒãƒ•ã‚¡ã‚µã‚¤ã‚ºã‚’å–å¾—
 		int size_needed = MultiByteToWideChar(CP_ACP, 0, &str[0], (int)str.size(), NULL, 0);
 
 		std::wstring wstrTo(size_needed, 0);
@@ -32,11 +32,11 @@ Texture::~Texture()
 
 HRESULT Texture::Load(std::string fileName)
 {
-	TexMetadata metadata; //‰æ‘œ‚Ì•t‘®î•ñ
-	ScratchImage image;   //‰æ‘œ–{‘Ì
+	TexMetadata metadata; //ç”»åƒã®ä»˜å±æƒ…å ±
+	ScratchImage image;   //ç”»åƒæœ¬ä½“
 	HRESULT hr;
 
-	//ÀÛ‚É“Ç‚ñ‚Å‚ä‚­‚£@@@@@ 
+	//å®Ÿéš›ã«èª­ã‚“ã§ã‚†ãã…ã€€ã€€ã€€ã€€ã€€ 
 	hr = LoadFromWICFile(StringToWString(fileName).data(),
 		                 WIC_FLAGS::WIC_FLAGS_NONE,
 		                 &metadata, image);
@@ -50,12 +50,12 @@ HRESULT Texture::Load(std::string fileName)
 	SamDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
 	SamDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
 	SamDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
-	hr = Direct3D::pDevice->CreateSamplerState(&SamDesc, &pSampler_);//ƒOƒ[ƒoƒ‹I
+	hr = Direct3D::pDevice->CreateSamplerState(&SamDesc, &pSampler_);//ã‚°ãƒ­ãƒ¼ãƒãƒ«ï¼
 	if (FAILED(hr))
 	{
 		return S_FALSE;
 	}
-	//ƒVƒF[ƒ_[ƒŠƒ\[ƒXƒrƒ…[
+	//ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ãƒªã‚½ãƒ¼ã‚¹ãƒ“ãƒ¥ãƒ¼
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC srv = {};
 	srv.Format = DXGI_FORMAT_R8G8B8A8_UNORM;

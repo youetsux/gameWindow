@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include <d3d11.h>
 #include <string>
 
@@ -12,7 +12,7 @@ public:
 	ID3D11ShaderResourceView* GetSRV() { return pSRV_; }
 	void Release();
 private:
-	//–{“–‚ÍAƒXƒ}ƒ|‚ğg‚Á‚½‚Ù‚¤‚¢‚¢‚æ
+	//æœ¬å½“ã¯ã€ã‚¹ãƒãƒã‚’ä½¿ã£ãŸã»ã†ã„ã„ã‚ˆ
 	ID3D11SamplerState* pSampler_;
 	ID3D11ShaderResourceView* pSRV_;
 };
