@@ -61,4 +61,31 @@
   <ItemGroup>
     <FxCompile Include="Simple3D.hlsl" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="DiceFace.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClCompile Include="DiceFace.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Dice.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClCompile Include="Dice.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <Image Include="sainome.png">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Transform.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClCompile Include="Transform.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+  </ItemGroup>
 </Project>
