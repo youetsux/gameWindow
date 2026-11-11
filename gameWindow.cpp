@@ -11,8 +11,8 @@
 
 #include "Direct3D.h"
 #include "Camera.h"
-#include "Dice.h"
-#include "Sprite.h"
+#include "Fbx.h"
+
 #include "Transform.h"
 
 //#pragma comment(lib, "d3d11.lib")
@@ -27,8 +27,7 @@ namespace {
 	const int WINDOW_HEIGHT = 600;                          // ウィンドウの高さ
 	RECT WIN_RECT = { 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT }; // ウィンドウの矩形
 
-	Dice* dice = nullptr; // Dice クラスのインスタンスへのポインタ
-	Sprite* sprite = nullptr; // Sprite クラスのインスタンスへのポインタ
+
 }
 
 // このコード モジュールに含まれる関数の宣言を転送します:
@@ -39,90 +38,59 @@ INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
-                     _In_ LPWSTR    lpCmdLine,
-                     _In_ int       nCmdShow)
+                     _In_ LPWSTR lpCmdLine,
+                     _In_ int nCmdShow)
 {
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
-
-    // TODO: ここにコードを挿入してください。
-
-    // グローバル文字列を初期化する
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
     LoadStringW(hInstance, IDC_GAMEWINDOW, szWindowClass, MAX_LOADSTRING);
     MyRegisterClass(hInstance);
+    if (!InitInstance(hInstance, nCmdShow)) return FALSE;
 
-
-    // アプリケーション初期化の実行:
-    if (!InitInstance (hInstance, nCmdShow))
+    Fbx model;
+    HRESULT hr = model.Load("Assets/FBXTest/TexturedCube/textured_cube.fbx");
+    if (FAILED(hr))
     {
-        return FALSE;
+        MessageBoxW(nullptr, L"FBX読み込み失敗。出力ウィンドウを確認してください。",
+            L"FBX", MB_OK);
+        model.Release();
+        Direct3D::Release();
+        return 1;
     }
 
-
-    HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_GAMEWINDOW));
+    Transform modelTransform;
+    modelTransform.scale_ = XMFLOAT3(100.0f, 100.0f, 100.0f);
+    modelTransform.rotate_ = XMFLOAT3(20.0f, 30.0f, 0.0f);
 
     MSG msg = {};
-
-	dice = new Dice(); // Dice クラスのインスタンスを作成
-	dice->Initialize(); // Dice クラスの初期化
-
-	sprite = new Sprite(L"sainome.png"); // Sprite クラスのインスタンスを作成
-
-	
-
-    Transform diceTransform;
-    diceTransform.position_ = XMFLOAT3(-1.5f, 0.0f, 0.0f);
-    diceTransform.rotate_ = XMFLOAT3(20.0f, 30.0f, 0.0f);
-    diceTransform.scale_ = XMFLOAT3(0.8f, 0.8f, 0.8f);
-
-    Transform spriteTransform;
-    spriteTransform.position_ = XMFLOAT3(0.55f, 0.55f, 0.0f);
-    spriteTransform.rotate_ = XMFLOAT3(0.0f, 0.0f, 15.0f);
-    spriteTransform.scale_ = XMFLOAT3(0.2f, 0.2f, 1.0f);
-
-    // メイン メッセージ ループ:
     while (msg.message != WM_QUIT)
     {
-		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
-		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
-		else
-		{
-            Camera::SetPosition(XMVectorSet(0, 3, -10, 0)); //カメラの位置
-            Camera::SetTarget(XMVectorSet(0, 0, 0, 0));    //カメラの焦点
+        if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
+        {
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+        }
+        else
+        {
+            Camera::SetPosition(XMVectorSet(0, 3, -10, 0));
+            Camera::SetTarget(XMVectorSet(0, 0, 0, 0));
             Camera::Update();
-
-            // 角度は度で指定する。値を更新してから行列を計算する。
-            diceTransform.rotate_.y += 0.5f;
-            spriteTransform.rotate_.z += 0.5f;
-            diceTransform.Calculation();
-            spriteTransform.Calculation();
+            modelTransform.rotate_.y += 0.5f;
+            modelTransform.Calculation();
 
             Direct3D::BeginDraw();
-            dice->Draw(diceTransform);
-            sprite->Draw(spriteTransform);
-            Direct3D::EndDraw();   // 描画終了
-
-		}
+            model.Draw(modelTransform);
+            Direct3D::EndDraw();
+        }
     }
-	dice->Release();
-	delete dice;
-	dice = nullptr; // Dice クラスの解放
-	Direct3D::Release(); // Direct3D 11 の解放
-
-    return (int) msg.wParam;
+    // GPUのバッファを先に解放してからDirect3Dを終了する。
+    model.Release();
+    Direct3D::Release();
+    return static_cast<int>(msg.wParam);
 }
 
 
-
-//
-//  関数: MyRegisterClass()
-//
-//  目的: ウィンドウ クラスを登録します。
-//
 ATOM MyRegisterClass(HINSTANCE hInstance)
 {
     WNDCLASSEXW wcex;
