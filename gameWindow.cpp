@@ -7,7 +7,8 @@
 #define MAX_LOADSTRING 100
 
 #include <d3d11.h>
-#include <wrl/client.h>
+#include <objbase.h>
+#pragma comment(lib, "ole32.lib")
 
 #include "Direct3D.h"
 #include "Camera.h"
@@ -19,6 +20,13 @@
 
 namespace {
   
+    // WICで画像を読み込む間、メインスレッドのCOMを初期化しておく。
+    struct ComApartment
+    {
+        HRESULT result = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
+        ~ComApartment() { if (SUCCEEDED(result)) CoUninitialize(); }
+    };
+
     // グローバル変数:
     HINSTANCE hInst;                                // 現在のインターフェイス
     WCHAR szTitle[MAX_LOADSTRING];                  // タイトル バーのテキスト
@@ -43,6 +51,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 {
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
+    const ComApartment com;
+    if (FAILED(com.result)) return 1;
+
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
     LoadStringW(hInstance, IDC_GAMEWINDOW, szWindowClass, MAX_LOADSTRING);
     MyRegisterClass(hInstance);

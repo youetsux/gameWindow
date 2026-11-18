@@ -2,10 +2,12 @@
 #include <d3d11.h>
 #include <DirectXMath.h>
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <vector>
 #include "Transform.h"
 #include "Direct3D.h"
+#include "Texture.h"
 
 struct ufbx_node;
 
@@ -26,6 +28,7 @@ private:
     struct MaterialRange
     {
         DirectX::XMFLOAT4 diffuse = { 1, 1, 1, 1 };
+        std::unique_ptr<Texture> texture;
         UINT firstIndex = 0;
         UINT indexCount = 0;
     };
@@ -39,5 +42,6 @@ private:
 
     HRESULT ReadVertices(const ufbx_node* node);
     HRESULT ReadIndices(const ufbx_node* node);
+    void ReadTextures(const ufbx_node* node, const std::string& fileName);
     HRESULT CreateBuffers();
 };

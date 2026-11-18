@@ -2,10 +2,12 @@
 #include "Direct3D.h"
 #include "Camera.h"
 #include "ufbx.h"
+#include <algorithm>
 #include <climits>
 #include <cmath>
 #include <cstdio>
-#include <cstring>
+#include <filesystem>
+#include <string_view>
 
 Fbx::~Fbx()
 {
@@ -71,6 +73,7 @@ HRESULT Fbx::Load(const std::string& fileName)
     HRESULT hr = S_OK;
     hr = ReadVertices(meshNode);
     if (SUCCEEDED(hr)) hr = ReadIndices(meshNode);
+    if (SUCCEEDED(hr)) ReadTextures(meshNode, fileName);
 
     // 必要な値を自分のvectorへコピーした後で、ufbxのデータを解放する。
     ufbx_free_scene(scene);
@@ -139,6 +142,8 @@ HRESULT Fbx::ReadIndices(const ufbx_node* node)
             static_cast<float>(color.y * factor), static_cast<float>(color.z * factor), 1);
     }
     std::vector<std::vector<uint32_t>> materialIndices(materials_.size());
+    // 座標系の変換や負のスケールで表裏が反転したら、面の頂点順も反転する。
+    const bool flipWinding = ufbx_matrix_determinant(&node->geometry_to_world) < 0;
 
     // モデラー側で三角形化してから出力したFBXを使う。
     for (size_t faceIndex = 0; faceIndex < mesh->faces.count; faceIndex++)
@@ -161,6 +166,11 @@ HRESULT Fbx::ReadIndices(const ufbx_node* node)
             if (cornerIndex >= vertices_.size()) return E_FAIL;
             materialIndices[materialIndex].push_back(cornerIndex);
         }
+        if (flipWinding)
+        {
+            auto& group = materialIndices[materialIndex];
+            std::swap(group[group.size() - 2], group.back());
+        }
     }
     // グループを連結して、1本のインデックスバッファに入れる。
     indices_.reserve(mesh->faces.count * 3);
@@ -173,6 +183,57 @@ HRESULT Fbx::ReadIndices(const ufbx_node* node)
         indices_.insert(indices_.end(), group.begin(), group.end());
     }
     return S_OK;
+}
+
+void Fbx::ReadTextures(const ufbx_node* node, const std::string& fileName)
+{
+    const auto folder = std::filesystem::path(std::u8string(fileName.begin(), fileName.end())).parent_path();
+    for (size_t i = 0; i < node->materials.count; ++i)
+    {
+        auto& material = materials_[i];
+        const auto& diffuse = node->materials.data[i]->fbx.diffuse_color;
+        const ufbx_texture* source = diffuse.texture;
+        if (!material.indexCount || !diffuse.texture_enabled || !source
+            || source->type != UFBX_TEXTURE_FILE) continue;
+
+        const ufbx_vertex_vec2* uv = &node->mesh->vertex_uv;
+        if (source->uv_set.length)
+        {
+            for (const auto& set : node->mesh->uv_sets)
+            {
+                if (std::string_view(set.name.data, set.name.length)
+                    == std::string_view(source->uv_set.data, source->uv_set.length))
+                {
+                    uv = &set.vertex_uv;
+                    break;
+                }
+            }
+        }
+        if (!uv->exists) continue;
+
+        // FBXの参照から画像名を取り、モデルと同じフォルダーだけを参照する。
+        const ufbx_string name = source->relative_filename.length
+            ? source->relative_filename : source->filename;
+        if (!name.length) continue;
+        const auto image = folder / std::filesystem::path(std::u8string(name.data, name.data + name.length)).filename();
+        auto texture = std::make_unique<Texture>();
+        // Texture::Loadは読み込み失敗時にS_FALSEを返す。
+        if (texture->Load(image.wstring()) != S_OK)
+        {
+            OutputDebugStringW((L"FBX Diffuse texture could not be loaded: " + image.wstring() + L"\n").c_str());
+            continue;
+        }
+
+        // 同じ位置でも面の角が違えばUVが違う。Vは画像の原点に合わせる。
+        for (UINT j = 0; j < material.indexCount; ++j)
+        {
+            const uint32_t corner = indices_[material.firstIndex + j];
+            const ufbx_vec2 value = ufbx_get_vertex_vec2(uv, corner);
+            vertices_[corner].uv = DirectX::XMVectorSet(static_cast<float>(value.x),
+                static_cast<float>(1.0 - value.y), 0, 0);
+        }
+        material.texture = std::move(texture);
+    }
 }
 
 HRESULT Fbx::CreateBuffers()
@@ -211,7 +272,6 @@ void Fbx::Draw(Transform& transform)
     Direct3D::UseDepthBuffer(true);
     Direct3D::Constants3D cb = {};
     cb.useLighting = 0;
-    cb.useTexture = 0;
     cb.matWVP = DirectX::XMMatrixTranspose(
         transform.GetWorldMatrix()
         * Camera::GetViewMatrix()
@@ -228,8 +288,17 @@ void Fbx::Draw(Transform& transform)
     {
         if (!material.indexCount) continue;
         cb.diffuse = material.diffuse;
+        cb.useTexture = material.texture ? 1 : 0;
+        ID3D11ShaderResourceView* srv = material.texture ? material.texture->GetSRV() : nullptr;
+        ID3D11SamplerState* sampler = material.texture ? material.texture->GetSampler() : nullptr;
+        Direct3D::pContext->PSSetShaderResources(0, 1, &srv);
+        Direct3D::pContext->PSSetSamplers(0, 1, &sampler);
         Direct3D::pContext->UpdateSubresource(pConstantBuffer_, 0, nullptr, &cb, 0, 0);
         Direct3D::pContext->DrawIndexed(material.indexCount, material.firstIndex, 0);
     }
+    ID3D11ShaderResourceView* srv = nullptr;
+    ID3D11SamplerState* sampler = nullptr;
+    Direct3D::pContext->PSSetShaderResources(0, 1, &srv);
+    Direct3D::pContext->PSSetSamplers(0, 1, &sampler);
     Direct3D::UseDepthBuffer(false);
 }

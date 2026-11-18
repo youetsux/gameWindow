@@ -28,16 +28,24 @@ Texture::Texture()
 }
 
 Texture::~Texture()
-{}
+{
+    Release();
+}
 
 HRESULT Texture::Load(std::string fileName)
 {
+    return Load(StringToWString(fileName));
+}
+
+HRESULT Texture::Load(const std::wstring& fileName)
+{
+    Release();
 	TexMetadata metadata; //画像の付属情報
 	ScratchImage image;   //画像本体
 	HRESULT hr;
 
 	//実際に読んでゆくぅ　　　　　 
-	hr = LoadFromWICFile(StringToWString(fileName).data(),
+	hr = LoadFromWICFile(fileName.c_str(),
 		                 WIC_FLAGS::WIC_FLAGS_NONE,
 		                 &metadata, image);
 	if (FAILED(hr))
@@ -66,6 +74,7 @@ HRESULT Texture::Load(std::string fileName)
 
 	if (FAILED(hr))
 	{
+		Release();
 		return S_FALSE;
 	}
 	return S_OK;
