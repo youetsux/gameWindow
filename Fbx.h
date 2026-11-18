@@ -32,6 +32,13 @@ private:
         DirectX::XMMATRIX matWVP;
     };
 
+    struct MaterialRange
+    {
+        UINT firstIndex = 0;
+        UINT indexCount = 0;
+    };
+
+    std::vector<MaterialRange> materials_;
     std::vector<VERTEX> vertices_;
     std::vector<uint32_t> indices_;
     ID3D11Buffer* pVertexBuffer_ = nullptr;
@@ -39,6 +46,6 @@ private:
     ID3D11Buffer* pConstantBuffer_ = nullptr;
 
     HRESULT ReadVertices(const ufbx_node* node);
-    HRESULT ReadIndices(const ufbx_mesh* mesh);
+    HRESULT ReadIndices(const ufbx_node* node);
     HRESULT CreateBuffers();
 };

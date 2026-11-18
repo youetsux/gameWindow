@@ -17,6 +17,7 @@ void Fbx::Release()
     if (pConstantBuffer_) { pConstantBuffer_->Release(); pConstantBuffer_ = nullptr; }
     if (pIndexBuffer_) { pIndexBuffer_->Release(); pIndexBuffer_ = nullptr; }
     if (pVertexBuffer_) { pVertexBuffer_->Release(); pVertexBuffer_ = nullptr; }
+    materials_.clear();
     vertices_.clear();
     indices_.clear();
 }
@@ -69,7 +70,7 @@ HRESULT Fbx::Load(const std::string& fileName)
 
     HRESULT hr = S_OK;
     hr = ReadVertices(meshNode);
-    if (SUCCEEDED(hr)) hr = ReadIndices(mesh);
+    if (SUCCEEDED(hr)) hr = ReadIndices(meshNode);
 
     // 必要な値を自分のvectorへコピーした後で、ufbxのデータを解放する。
     ufbx_free_scene(scene);
@@ -110,10 +111,15 @@ HRESULT Fbx::ReadVertices(const ufbx_node* node)
     return S_OK;
 }
 
-HRESULT Fbx::ReadIndices(const ufbx_mesh* mesh)
+HRESULT Fbx::ReadIndices(const ufbx_node* node)
 {
-    if (mesh->faces.count == 0) return E_FAIL;
-    indices_.clear();
+    const ufbx_mesh* mesh = node->mesh;
+    if (mesh->faces.count == 0
+        || mesh->faces.count > UINT_MAX / sizeof(uint32_t) / 3) return E_FAIL;
+
+    // マテリアルを割り当てていないメッシュも、既定の1グループで描く。
+    materials_.resize(node->materials.count ? node->materials.count : 1);
+    std::vector<std::vector<uint32_t>> materialIndices(materials_.size());
 
     // モデラー側で三角形化してから出力したFBXを使う。
     for (size_t faceIndex = 0; faceIndex < mesh->faces.count; faceIndex++)
@@ -125,6 +131,10 @@ HRESULT Fbx::ReadIndices(const ufbx_mesh* mesh)
             return E_FAIL;
         }
 
+        const uint32_t materialIndex = mesh->face_material.count
+            ? mesh->face_material.data[faceIndex] : 0;
+        if (materialIndex >= materialIndices.size()) return E_FAIL;
+
         // 1つの三角形を構成する、3個の頂点番号を順に取得する。
         for (uint32_t corner = 0; corner < 3; corner++)
         {
@@ -133,8 +143,18 @@ HRESULT Fbx::ReadIndices(const ufbx_mesh* mesh)
             // 面の角の番号を、位置の頂点番号に変換する。
             uint32_t vertexIndex = mesh->vertex_indices.data[cornerIndex];
             if (vertexIndex >= vertices_.size()) return E_FAIL;
-            indices_.push_back(vertexIndex);
+            materialIndices[materialIndex].push_back(vertexIndex);
         }
+    }
+    // グループを連結して、1本のインデックスバッファに入れる。
+    indices_.reserve(mesh->faces.count * 3);
+    for (size_t i = 0; i < materials_.size(); ++i)
+    {
+        auto& range = materials_[i];
+        const auto& group = materialIndices[i];
+        range.firstIndex = static_cast<UINT>(indices_.size());
+        range.indexCount = static_cast<UINT>(group.size());
+        indices_.insert(indices_.end(), group.begin(), group.end());
     }
     return S_OK;
 }
@@ -185,5 +205,9 @@ void Fbx::Draw(Transform& transform)
     Direct3D::pContext->IASetIndexBuffer(pIndexBuffer_, DXGI_FORMAT_R32_UINT, 0);
     Direct3D::pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     Direct3D::pContext->VSSetConstantBuffers(0, 1, &pConstantBuffer_);
-    Direct3D::pContext->DrawIndexed(static_cast<UINT>(indices_.size()), 0, 0);
+    for (const auto& material : materials_)
+    {
+        if (material.indexCount)
+            Direct3D::pContext->DrawIndexed(material.indexCount, material.firstIndex, 0);
+    }
 }
