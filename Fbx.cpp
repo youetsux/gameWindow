@@ -92,21 +92,31 @@ HRESULT Fbx::Load(const std::string& fileName)
 HRESULT Fbx::ReadVertices(const ufbx_node* node)
 {
     const ufbx_mesh* mesh = node->mesh;
-    if (mesh->num_vertices == 0) return E_FAIL;
-    vertices_.resize(mesh->num_vertices);
+    if (mesh->num_indices == 0 || mesh->num_indices > UINT_MAX / sizeof(Direct3D::Vertex3D)) return E_FAIL;
+    // 位置を共有する面でも、角ごとに異なる頂点カラーを持てる。
+    vertices_.resize(mesh->num_indices);
 
-    for (size_t i = 0; i < mesh->num_vertices; i++)
+    for (size_t i = 0; i < mesh->num_indices; i++)
     {
         // FBX内の配置・回転・拡大率と、座標系・単位変換を位置へ反映する。
         ufbx_vec3 p = ufbx_transform_position(
-            &node->geometry_to_world, mesh->vertices.data[i]);
+            &node->geometry_to_world, ufbx_get_vertex_vec3(&mesh->vertex_position, i));
         DirectX::XMFLOAT3 position(
             static_cast<float>(p.x),
             static_cast<float>(p.y),
             static_cast<float>(p.z));
         if (!std::isfinite(position.x) || !std::isfinite(position.y)
             || !std::isfinite(position.z)) return E_FAIL;
-        vertices_[i].position = position;
+        auto& vertex = vertices_[i];
+        vertex.pos = DirectX::XMVectorSet(position.x, position.y, position.z, 1);
+        vertex.uv = DirectX::XMVectorZero();
+        vertex.normal = DirectX::XMVectorZero();
+        if (mesh->vertex_color.exists)
+        {
+            const ufbx_vec4 color = ufbx_get_vertex_vec4(&mesh->vertex_color, i);
+            vertex.color = DirectX::XMVectorSet(static_cast<float>(color.x),
+                static_cast<float>(color.y), static_cast<float>(color.z), static_cast<float>(color.w));
+        }
     }
     return S_OK;
 }
@@ -119,6 +129,15 @@ HRESULT Fbx::ReadIndices(const ufbx_node* node)
 
     // マテリアルを割り当てていないメッシュも、既定の1グループで描く。
     materials_.resize(node->materials.count ? node->materials.count : 1);
+    for (size_t i = 0; i < node->materials.count; ++i)
+    {
+        const auto& maps = node->materials.data[i]->fbx;
+        const ufbx_vec3 color = maps.diffuse_color.has_value
+            ? maps.diffuse_color.value_vec3 : ufbx_vec3 { 1, 1, 1 };
+        const double factor = maps.diffuse_factor.has_value ? maps.diffuse_factor.value_real : 1.0;
+        materials_[i].diffuse = DirectX::XMFLOAT4(static_cast<float>(color.x * factor),
+            static_cast<float>(color.y * factor), static_cast<float>(color.z * factor), 1);
+    }
     std::vector<std::vector<uint32_t>> materialIndices(materials_.size());
 
     // モデラー側で三角形化してから出力したFBXを使う。
@@ -139,11 +158,8 @@ HRESULT Fbx::ReadIndices(const ufbx_node* node)
         for (uint32_t corner = 0; corner < 3; corner++)
         {
             uint32_t cornerIndex = face.index_begin + corner;
-            if (cornerIndex >= mesh->vertex_indices.count) return E_FAIL;
-            // 面の角の番号を、位置の頂点番号に変換する。
-            uint32_t vertexIndex = mesh->vertex_indices.data[cornerIndex];
-            if (vertexIndex >= vertices_.size()) return E_FAIL;
-            materialIndices[materialIndex].push_back(vertexIndex);
+            if (cornerIndex >= vertices_.size()) return E_FAIL;
+            materialIndices[materialIndex].push_back(cornerIndex);
         }
     }
     // グループを連結して、1本のインデックスバッファに入れる。
@@ -163,12 +179,12 @@ HRESULT Fbx::CreateBuffers()
 {
     if (!Direct3D::pDevice || vertices_.empty() || indices_.empty()) return E_FAIL;
     // ByteWidthはUINTなので、キャストの前に収まるか確認する。
-    if (vertices_.size() > UINT_MAX / sizeof(VERTEX)
+    if (vertices_.size() > UINT_MAX / sizeof(Direct3D::Vertex3D)
         || indices_.size() > UINT_MAX / sizeof(uint32_t)) return E_FAIL;
 
     D3D11_BUFFER_DESC desc = {};
     desc.Usage = D3D11_USAGE_DEFAULT;
-    desc.ByteWidth = static_cast<UINT>(sizeof(VERTEX) * vertices_.size());
+    desc.ByteWidth = static_cast<UINT>(sizeof(Direct3D::Vertex3D) * vertices_.size());
     desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
     D3D11_SUBRESOURCE_DATA data = {};
     data.pSysMem = vertices_.data();
@@ -181,7 +197,7 @@ HRESULT Fbx::CreateBuffers()
     hr = Direct3D::pDevice->CreateBuffer(&desc, &data, &pIndexBuffer_);
     if (FAILED(hr)) return hr;
 
-    desc.ByteWidth = sizeof(CONSTANT_BUFFER);
+    desc.ByteWidth = sizeof(Direct3D::Constants3D);
     desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
     return Direct3D::pDevice->CreateBuffer(&desc, nullptr, &pConstantBuffer_);
 }
@@ -191,23 +207,29 @@ void Fbx::Draw(Transform& transform)
     // 読み込み失敗後や、まだLoadしていない場合は描かない。
     if (!pVertexBuffer_ || !pIndexBuffer_ || !pConstantBuffer_) return;
 
-    Direct3D::SetShader(SHADER_MODEL);
-    CONSTANT_BUFFER cb = {};
+    Direct3D::SetShader(SHADER_3D);
+    Direct3D::UseDepthBuffer(true);
+    Direct3D::Constants3D cb = {};
+    cb.useLighting = 0;
+    cb.useTexture = 0;
     cb.matWVP = DirectX::XMMatrixTranspose(
         transform.GetWorldMatrix()
         * Camera::GetViewMatrix()
         * Camera::GetProjectionMatrix());
-    Direct3D::pContext->UpdateSubresource(pConstantBuffer_, 0, nullptr, &cb, 0, 0);
 
-    UINT stride = sizeof(VERTEX);
+    UINT stride = sizeof(Direct3D::Vertex3D);
     UINT offset = 0;
     Direct3D::pContext->IASetVertexBuffers(0, 1, &pVertexBuffer_, &stride, &offset);
     Direct3D::pContext->IASetIndexBuffer(pIndexBuffer_, DXGI_FORMAT_R32_UINT, 0);
     Direct3D::pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     Direct3D::pContext->VSSetConstantBuffers(0, 1, &pConstantBuffer_);
+    Direct3D::pContext->PSSetConstantBuffers(0, 1, &pConstantBuffer_);
     for (const auto& material : materials_)
     {
-        if (material.indexCount)
-            Direct3D::pContext->DrawIndexed(material.indexCount, material.firstIndex, 0);
+        if (!material.indexCount) continue;
+        cb.diffuse = material.diffuse;
+        Direct3D::pContext->UpdateSubresource(pConstantBuffer_, 0, nullptr, &cb, 0, 0);
+        Direct3D::pContext->DrawIndexed(material.indexCount, material.firstIndex, 0);
     }
+    Direct3D::UseDepthBuffer(false);
 }

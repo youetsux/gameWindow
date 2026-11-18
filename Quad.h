@@ -6,22 +6,6 @@
 
 using namespace DirectX;
 
-//コンスタントバッファー
-struct CONSTANT_BUFFER
-{
-	XMMATRIX	matWVP;
-	XMMATRIX	matW;
-};
-
-
-//頂点構造体
-struct VERTEX
-{
-	XMVECTOR pos; // 頂点座標 (x, y, z, 1)
-	XMVECTOR uv; // 頂点UV座標 (u, v, 0, 0)
-	XMVECTOR normal; // 頂点法線ベクトル (x, y, z, 0)
-};
-
 class Quad
 {
 
@@ -32,7 +16,7 @@ public:
 	virtual void Initialize(const char* textureFileName = "image.jpg");
 	virtual void Draw(Transform& transform);
 	void Release();
-	VERTEX vertices[4]; // 頂点座標
+	Direct3D::Vertex3D vertices[4]; // 頂点座標
 private:
 	ID3D11Buffer* pVertexBuffer_;	//頂点バッファ
 	ID3D11Buffer* pIndexBuffer_;    //インデックスバッファ

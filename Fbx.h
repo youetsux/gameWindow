@@ -5,9 +5,9 @@
 #include <string>
 #include <vector>
 #include "Transform.h"
+#include "Direct3D.h"
 
 struct ufbx_node;
-struct ufbx_mesh;
 
 class Fbx
 {
@@ -23,23 +23,15 @@ public:
     void Release();
 
 private:
-    struct VERTEX
-    {
-        DirectX::XMFLOAT3 position;
-    };
-    struct CONSTANT_BUFFER
-    {
-        DirectX::XMMATRIX matWVP;
-    };
-
     struct MaterialRange
     {
+        DirectX::XMFLOAT4 diffuse = { 1, 1, 1, 1 };
         UINT firstIndex = 0;
         UINT indexCount = 0;
     };
 
     std::vector<MaterialRange> materials_;
-    std::vector<VERTEX> vertices_;
+    std::vector<Direct3D::Vertex3D> vertices_;
     std::vector<uint32_t> indices_;
     ID3D11Buffer* pVertexBuffer_ = nullptr;
     ID3D11Buffer* pIndexBuffer_ = nullptr;

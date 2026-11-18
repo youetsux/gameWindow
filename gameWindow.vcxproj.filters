@@ -94,5 +94,4 @@
     <ClCompile Include="Fbx.cpp"><Filter>ソース ファイル</Filter></ClCompile>
     <ClCompile Include="ufbx.c"><Filter>ソース ファイル</Filter></ClCompile>
   </ItemGroup>
-  <ItemGroup><None Include="SimpleModel.hlsl" /></ItemGroup>
 </Project>

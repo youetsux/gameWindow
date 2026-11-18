@@ -29,7 +29,7 @@ void Quad::Initialize(const char* textureFileName)
 {
 	// 頂点データ用バッファの設定
 	D3D11_BUFFER_DESC bd_vertex;
-	bd_vertex.ByteWidth = sizeof(VERTEX) * 4; // バッファのサイズ
+	bd_vertex.ByteWidth = sizeof(Direct3D::Vertex3D) * 4; // バッファのサイズ
 	bd_vertex.Usage = D3D11_USAGE_DEFAULT;
 	bd_vertex.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	bd_vertex.CPUAccessFlags = 0;
@@ -57,7 +57,7 @@ void Quad::Initialize(const char* textureFileName)
 
 	//コンスタントバッファ作成
 	D3D11_BUFFER_DESC cb;
-	cb.ByteWidth = sizeof(CONSTANT_BUFFER);
+	cb.ByteWidth = sizeof(Direct3D::Constants3D);
 	cb.Usage = D3D11_USAGE_DYNAMIC;
 	cb.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	cb.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
@@ -91,14 +91,14 @@ void Quad::Draw(Transform& transform)
 
 	Direct3D::SetShader(SHADER_3D);
 
-	CONSTANT_BUFFER cb;
+	Direct3D::Constants3D cb = {};
 	cb.matWVP = XMMatrixTranspose(WorldMatrix * Camera::GetViewMatrix() * Camera::GetProjectionMatrix());
 	cb.matW = XMMatrixTranspose(WorldMatrix); //ワールド行列を転置してコンスタントバッファに渡す
 
 	//コンスタントバッファにデータを転送する
 	D3D11_MAPPED_SUBRESOURCE pdata;
 	Direct3D::pContext->Map(pConstantBuffer_, 0, D3D11_MAP_WRITE_DISCARD, 0, &pdata);	// GPUからのデータアクセスを止める
-	memcpy_s(pdata.pData, pdata.RowPitch, (void*)(&cb), sizeof(cb));	// データを値を送る
+	memcpy_s(pdata.pData, sizeof(cb), &cb, sizeof(cb));	// データを値を送る
 	Direct3D::pContext->Unmap(pConstantBuffer_, 0);	//再開
 
 	ID3D11SamplerState* pSampler = pTexture_->GetSampler();
@@ -109,7 +109,7 @@ void Quad::Draw(Transform& transform)
 
 
 	//頂点バッファ
-	UINT stride = sizeof(VERTEX);
+	UINT stride = sizeof(Direct3D::Vertex3D);
 	UINT offset = 0;
 	Direct3D::pContext->IASetVertexBuffers(0, 1, &pVertexBuffer_, &stride, &offset);
 

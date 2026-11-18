@@ -210,5 +210,4 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
   </ItemGroup>
-  <ItemGroup><None Include="SimpleModel.hlsl" /></ItemGroup>
 </Project>
