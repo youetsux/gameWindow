@@ -37,6 +37,7 @@ private:
 
     struct MaterialRange
     {
+        DirectX::XMFLOAT4 diffuse = { 1, 1, 1, 1 };
         UINT firstIndex = 0;
         UINT indexCount = 0;
     };

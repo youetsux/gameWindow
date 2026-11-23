@@ -210,6 +210,19 @@ HRESULT Fbx::ReadIndices(const ufbx_node* node)
 
     indices_.clear();
     materials_.resize(node->materials.count ? node->materials.count : 1);
+    for (size_t i = 0; i < node->materials.count; ++i)
+    {
+        const auto& maps = node->materials.data[i]->fbx;
+        const ufbx_vec3 color = maps.diffuse_color.has_value
+            ? maps.diffuse_color.value_vec3 : ufbx_vec3 { 1, 1, 1 };
+        const double factor = maps.diffuse_factor.has_value
+            ? maps.diffuse_factor.value_real : 1.0;
+
+        materials_[i].diffuse = DirectX::XMFLOAT4(
+            static_cast<float>(color.x * factor),
+            static_cast<float>(color.y * factor),
+            static_cast<float>(color.z * factor), 1.0f);
+    }
     std::vector<std::vector<uint32_t>> materialIndices(materials_.size());
 
     for (size_t faceIndex = 0; faceIndex < mesh->faces.count; faceIndex++)
