@@ -17,6 +17,7 @@ void Fbx::Release()
     if (pConstantBuffer_) { pConstantBuffer_->Release(); pConstantBuffer_ = nullptr; }
     if (pIndexBuffer_) { pIndexBuffer_->Release(); pIndexBuffer_ = nullptr; }
     if (pVertexBuffer_) { pVertexBuffer_->Release(); pVertexBuffer_ = nullptr; }
+    materials_.clear();
     vertices_.clear();
     indices_.clear();
 }
@@ -70,7 +71,7 @@ HRESULT Fbx::Load(const std::string& fileName)
 
     HRESULT hr = S_OK;
     hr = ReadVertices(meshNode);
-    if (SUCCEEDED(hr)) hr = ReadIndices(mesh);
+    if (SUCCEEDED(hr)) hr = ReadIndices(meshNode);
 
     // 必要な値を自分のvectorへコピーした後で、ufbxのデータを解放する。
     ufbx_free_scene(scene);
@@ -120,8 +121,14 @@ void Fbx::Draw(Transform& transform)
     ID3D11ShaderResourceView* nullSRV = nullptr;
     Direct3D::pContext->PSSetShaderResources(0, 1, &nullSRV);
 
-    Direct3D::pContext->DrawIndexed(
-        static_cast<UINT>(indices_.size()), 0, 0);
+    for (const auto& material : materials_)
+    {
+        if (material.indexCount)
+        {
+            Direct3D::pContext->DrawIndexed(
+                material.indexCount, material.firstIndex, 0);
+        }
+    }
 }
 
 HRESULT Fbx::ReadVertices(const ufbx_node* node)
@@ -195,15 +202,24 @@ HRESULT Fbx::ReadVertices(const ufbx_node* node)
     return vertices_.empty() ? E_FAIL : S_OK;
 }
 
-HRESULT Fbx::ReadIndices(const ufbx_mesh* mesh)
+HRESULT Fbx::ReadIndices(const ufbx_node* node)
 {
-    if (mesh->faces.count == 0) return E_FAIL;
+    const ufbx_mesh* mesh = node->mesh;
+    if (mesh->faces.count == 0
+        || mesh->faces.count > UINT_MAX / sizeof(uint32_t) / 3) return E_FAIL;
+
     indices_.clear();
+    materials_.resize(node->materials.count ? node->materials.count : 1);
+    std::vector<std::vector<uint32_t>> materialIndices(materials_.size());
 
     for (size_t faceIndex = 0; faceIndex < mesh->faces.count; faceIndex++)
     {
         const ufbx_face face = mesh->faces.data[faceIndex];
         if (face.num_indices != 3) return E_FAIL;
+
+        const uint32_t materialIndex = mesh->face_material.count
+            ? mesh->face_material.data[faceIndex] : 0;
+        if (materialIndex >= materialIndices.size()) return E_FAIL;
 
         for (uint32_t corner = 0; corner < 3; corner++)
         {
@@ -211,8 +227,19 @@ HRESULT Fbx::ReadIndices(const ufbx_mesh* mesh)
             if (cornerIndex >= vertices_.size()
                 || cornerIndex > UINT32_MAX) return E_FAIL;
 
-            indices_.push_back(static_cast<uint32_t>(cornerIndex));
+            materialIndices[materialIndex].push_back(
+                static_cast<uint32_t>(cornerIndex));
         }
+    }
+
+    indices_.reserve(mesh->faces.count * 3);
+    for (size_t i = 0; i < materials_.size(); ++i)
+    {
+        auto& range = materials_[i];
+        const auto& group = materialIndices[i];
+        range.firstIndex = static_cast<UINT>(indices_.size());
+        range.indexCount = static_cast<UINT>(group.size());
+        indices_.insert(indices_.end(), group.begin(), group.end());
     }
     return indices_.size() == vertices_.size() ? S_OK : E_FAIL;
 }
