@@ -1,58 +1,38 @@
-﻿# FBX形状読み込み用テストデータ
+﻿# FBX授業用データの前提
 
-ufbx公式リポジトリの `data` から取得した、静的形状の読み込み確認用データです。FBXファイルは取得したバイト列のまま保存しています。
+この授業では、学生がモデラーで準備したFBXを読み込みます。使用するモデルは、あらかじめ次の条件を満たしているものとします。
 
-## 授業で使う順番
+- 全ての面を三角形化済み
+- メッシュを1個へ結合済み
+- 静的モデル（スケルトン・アニメーション・スキニングなし）
+- 法線を出力済み。ない場合はufbxで生成する
+- テクスチャを使う場合はUVを出力済み
+- Diffuse画像はFBXと同じフォルダーに配置
 
-| 順番 | ファイル | 用途 | 頂点数 | 面数 | 三角形分割後 |
-| --- | --- | --- | ---: | ---: | ---: |
-| 1 | blender_272_cube_7400_binary.fbx | 最初の読み込み・四角形から三角形への分割 | 8 | 6 | 12 |
-| 2 | blender_282_suzanne_7400_binary.fbx | サルの頭。複雑な形状と上下・前後の確認 | 507 | 500 | 968 |
-| 3 | maya_cube_7400_ascii.fbx | ASCII形式と単位変換の確認 | 8 | 6 | 12 |
+## 頂点数はモデルごとに異なる
 
-頂点数は `mesh->num_vertices`（位置の頂点数）です。法線・UVを含めて描画用頂点を分割した場合の頂点数とは異なります。いずれもメッシュは1個です。形状確認では、FBX内のマテリアルを使わず単色で描画できます。
+`mesh->num_vertices` は位置の数です。今回の実装は面の角ごとに描画用頂点を作るため、GPUへ送る頂点数とインデックス数は `mesh->num_indices` に依存します。
 
-## 読み込み確認結果
+三角形化済みなら、面の角数は「そのモデルの三角形数 × 3」です。特定の頂点数やインデックス数を前提にしてはいけません。
 
-プロジェクト内の `ufbx.c` / `ufbx.h` を別のコンソール検証プログラムに組み込み、次の条件で実際に読み込み・全ての面の三角形分割・頂点インデックスの範囲を確認しました。ゲーム画面での描画確認はまだ行っていません。
+## 同梱データ
 
-```cpp
-ufbx_load_opts opts = {};
-opts.target_axes = ufbx_axes_left_handed_y_up;
-opts.target_unit_meters = 1.0;
-```
+`TexturedCube/textured_cube.fbx` は、教員側で動作確認するときに使える三角形化済みの例です。学生の制作モデルをこの立方体へ合わせる必要はありません。
 
-`node->geometry_to_world` を各位置に適用した後の範囲（単位m）は次のとおりです。
+次の3ファイルはufbx公式の形式確認用データで、四角形を含みます。今回のFbxクラスへそのまま渡す対象ではありません。
 
-| ファイル | 最小座標 (x, y, z) | 最大座標 (x, y, z) |
-| --- | --- | --- |
-| blender_272_cube_7400_binary.fbx | (-1, -1, -1) | (1, 1, 1) |
-| blender_282_suzanne_7400_binary.fbx | (-1.36719, -0.984375, -0.851562) | (1.36719, 0.984375, 0.851563) |
-| maya_cube_7400_ascii.fbx | (-0.005, -0.005, -0.005) | (0.005, 0.005, 0.005) |
+- `blender_272_cube_7400_binary.fbx`
+- `blender_282_suzanne_7400_binary.fbx`
+- `maya_cube_7400_ascii.fbx`
 
-ASCII版の立方体は1辺1cmです。メートルに統一すると非常に小さくなるので、表示時にTransformのscale_を (100, 100, 100) にすると1辺1mになります。最初の授業ではBlender版の立方体を使ってください。
-
-プロジェクトのフォルダーを作業ディレクトリとする場合の読み込みパス:
-
-```cpp
-"Assets/FBXTest/blender_272_cube_7400_binary.fbx"
-```
+これらを使用する場合も、モデラー側で三角形化・1メッシュ化してから再出力します。ゲーム側では面の三角形分割を行いません。
 
 ## 入手元とライセンス
 
-取得元: https://github.com/ufbx/ufbx/tree/main/data
+形式確認用データはufbx公式リポジトリの `data` から取得しています。
 
-リポジトリが提示するライセンスはMITまたはPublic Domain（Unlicense）の選択式です。原文を `LICENSE.ufbx.txt` に同梱しています。
+- https://github.com/ufbx/ufbx/tree/main/data
+- https://github.com/ufbx/ufbx/blob/main/LICENSE
 
-https://github.com/ufbx/ufbx/blob/main/LICENSE
+ライセンス原文は `LICENSE.ufbx.txt` に同梱しています。
 
-### 元ファイルと内容識別用Git blob SHA-1
-
-- https://github.com/ufbx/ufbx/blob/main/data/blender_272_cube_7400_binary.fbx
-  - `4fa2695a48c14c21937593b8d1a075da937b7cce`
-- https://github.com/ufbx/ufbx/blob/main/data/blender_282_suzanne_7400_binary.fbx
-  - `f7fcc0eaa86a6f88ca341c1d18cf0a55db44826f`
-- https://github.com/ufbx/ufbx/blob/main/data/maya_cube_7400_ascii.fbx
-  - `fa0a016ac563514f7c02e1018e594dce6b6a5551`
-
-保存後に `git hash-object` で元ファイルの識別値との一致を確認しています。
