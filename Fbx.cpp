@@ -6,6 +6,8 @@
 #include <cmath>
 #include <cstdio>
 #include <cstring>
+#include <filesystem>
+#include <string_view>
 
 Fbx::~Fbx()
 {
@@ -17,6 +19,15 @@ void Fbx::Release()
     if (pConstantBuffer_) { pConstantBuffer_->Release(); pConstantBuffer_ = nullptr; }
     if (pIndexBuffer_) { pIndexBuffer_->Release(); pIndexBuffer_ = nullptr; }
     if (pVertexBuffer_) { pVertexBuffer_->Release(); pVertexBuffer_ = nullptr; }
+    for (auto& material : materials_)
+    {
+        if (material.texture)
+        {
+            material.texture->Release();
+            delete material.texture;
+            material.texture = nullptr;
+        }
+    }
     materials_.clear();
     vertices_.clear();
     indices_.clear();
@@ -72,6 +83,7 @@ HRESULT Fbx::Load(const std::string& fileName)
     HRESULT hr = S_OK;
     hr = ReadVertices(meshNode);
     if (SUCCEEDED(hr)) hr = ReadIndices(meshNode);
+    if (SUCCEEDED(hr)) ReadTextures(meshNode, fileName);
 
     // 必要な値を自分のvectorへコピーした後で、ufbxのデータを解放する。
     ufbx_free_scene(scene);
@@ -255,6 +267,64 @@ HRESULT Fbx::ReadIndices(const ufbx_node* node)
         indices_.insert(indices_.end(), group.begin(), group.end());
     }
     return indices_.size() == vertices_.size() ? S_OK : E_FAIL;
+}
+
+void Fbx::ReadTextures(const ufbx_node* node, const std::string& fileName)
+{
+    const auto folder = std::filesystem::path(
+        std::u8string(fileName.begin(), fileName.end())).parent_path();
+
+    for (size_t i = 0; i < node->materials.count; ++i)
+    {
+        auto& material = materials_[i];
+        const auto& diffuse = node->materials.data[i]->fbx.diffuse_color;
+        const ufbx_texture* source = diffuse.texture;
+        if (!material.indexCount || !diffuse.texture_enabled || !source
+            || source->type != UFBX_TEXTURE_FILE) continue;
+
+        const ufbx_vertex_vec2* uv = &node->mesh->vertex_uv;
+        if (source->uv_set.length)
+        {
+            for (const auto& set : node->mesh->uv_sets)
+            {
+                if (std::string_view(set.name.data, set.name.length)
+                    == std::string_view(source->uv_set.data,
+                        source->uv_set.length))
+                {
+                    uv = &set.vertex_uv;
+                    break;
+                }
+            }
+        }
+        if (!uv->exists) continue;
+
+        const ufbx_string name = source->relative_filename.length
+            ? source->relative_filename : source->filename;
+        if (!name.length) continue;
+
+        const auto image = folder / std::filesystem::path(
+            std::u8string(name.data, name.data + name.length)).filename();
+
+        Texture* texture = new Texture;
+        if (texture->Load(image.string()) != S_OK)
+        {
+            OutputDebugStringW((L"FBX Diffuse texture could not be loaded: "
+                + image.wstring() + L"\n").c_str());
+            texture->Release();
+            delete texture;
+            continue;
+        }
+
+        for (UINT j = 0; j < material.indexCount; ++j)
+        {
+            const uint32_t corner = indices_[material.firstIndex + j];
+            const ufbx_vec2 value = ufbx_get_vertex_vec2(uv, corner);
+            vertices_[corner].uv = DirectX::XMFLOAT4(
+                static_cast<float>(value.x),
+                static_cast<float>(1.0 - value.y), 0.0f, 1.0f);
+        }
+        material.texture = texture;
+    }
 }
 
 HRESULT Fbx::CreateBuffers()

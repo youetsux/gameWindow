@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include "Transform.h"
+#include "Texture.h"
 
 struct ufbx_node;
 struct ufbx_mesh;
@@ -38,6 +39,7 @@ private:
     struct MaterialRange
     {
         DirectX::XMFLOAT4 diffuse = { 1, 1, 1, 1 };
+        Texture* texture = nullptr;
         UINT firstIndex = 0;
         UINT indexCount = 0;
     };
@@ -51,5 +53,6 @@ private:
 
     HRESULT ReadVertices(const ufbx_node* node);
     HRESULT ReadIndices(const ufbx_node* node);
+    void ReadTextures(const ufbx_node* node, const std::string& fileName);
     HRESULT CreateBuffers();
 };
