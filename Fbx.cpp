@@ -82,6 +82,9 @@ HRESULT Fbx::Load(const std::string& fileName)
     sprintf_s(message, "Copied: vertices=%zu indices=%zu\n",
         vertices_.size(), indices_.size());
     OutputDebugStringA(message);
+
+    hr = CreateBuffers();
+    if (FAILED(hr)) { Release(); return hr; }
     return S_OK;
 }
 
@@ -157,4 +160,35 @@ HRESULT Fbx::ReadIndices(const ufbx_mesh* mesh)
         }
     }
     return indices_.size() == vertices_.size() ? S_OK : E_FAIL;
+}
+
+HRESULT Fbx::CreateBuffers()
+{
+    if (!Direct3D::pDevice || vertices_.empty() || indices_.empty())
+        return E_FAIL;
+    if (vertices_.size() > UINT_MAX / sizeof(VERTEX)
+        || indices_.size() > UINT_MAX / sizeof(uint32_t)) return E_FAIL;
+
+    D3D11_BUFFER_DESC desc = {};
+    desc.Usage = D3D11_USAGE_DEFAULT;
+    desc.ByteWidth = static_cast<UINT>(sizeof(VERTEX) * vertices_.size());
+    desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+
+    D3D11_SUBRESOURCE_DATA data = {};
+    data.pSysMem = vertices_.data();
+    HRESULT hr = Direct3D::pDevice->CreateBuffer(
+        &desc, &data, &pVertexBuffer_);
+    if (FAILED(hr)) return hr;
+
+    desc.ByteWidth = static_cast<UINT>(sizeof(uint32_t) * indices_.size());
+    desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+    data.pSysMem = indices_.data();
+    hr = Direct3D::pDevice->CreateBuffer(
+        &desc, &data, &pIndexBuffer_);
+    if (FAILED(hr)) return hr;
+
+    desc.ByteWidth = sizeof(CONSTANT_BUFFER);
+    desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    return Direct3D::pDevice->CreateBuffer(
+        &desc, nullptr, &pConstantBuffer_);
 }
