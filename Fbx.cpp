@@ -164,8 +164,14 @@ HRESULT Fbx::ReadVertices(const ufbx_node* node)
                 static_cast<float>(p.y),
                 static_cast<float>(p.z), 1.0f);
 
-            // UVはまだ読まない。仮の値を使う。
-            vertex.uv = DirectX::XMFLOAT4(0, 0, 0, 1);
+            ufbx_vec2 uv = {};
+            if (mesh->vertex_uv.exists)
+            {
+                uv = ufbx_get_vertex_vec2(&mesh->vertex_uv, cornerIndex);
+            }
+            vertex.uv = DirectX::XMFLOAT4(
+                static_cast<float>(uv.x),
+                static_cast<float>(1.0 - uv.y), 0.0f, 1.0f);
 
             ufbx_vec3 n = ufbx_get_vertex_vec3(
                 &mesh->vertex_normal, cornerIndex);
