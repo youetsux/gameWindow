@@ -29,6 +29,7 @@ HRESULT Fbx::Load(const std::string& fileName)
     ufbx_load_opts options = {};
     options.target_axes = ufbx_axes_left_handed_y_up;
     options.target_unit_meters = 1.0; // 1単位を1mに揃える
+    options.generate_missing_normals = true;
     ufbx_error error = {};
     ufbx_scene* scene = ufbx_load_file(fileName.c_str(), &options, &error);
     if (!scene)
@@ -126,8 +127,12 @@ void Fbx::Draw(Transform& transform)
 HRESULT Fbx::ReadVertices(const ufbx_node* node)
 {
     const ufbx_mesh* mesh = node->mesh;
-    if (mesh->faces.count == 0 || !mesh->vertex_position.exists)
+    if (mesh->faces.count == 0 || !mesh->vertex_position.exists
+        || !mesh->vertex_normal.exists)
         return E_FAIL;
+
+    const ufbx_matrix normalMatrix =
+        ufbx_matrix_for_normals(&node->geometry_to_world);
 
     vertices_.clear();
     vertices_.reserve(mesh->num_indices);
@@ -159,9 +164,20 @@ HRESULT Fbx::ReadVertices(const ufbx_node* node)
                 static_cast<float>(p.y),
                 static_cast<float>(p.z), 1.0f);
 
-            // UVと法線はまだ読まない。仮の値を使う。
+            // UVはまだ読まない。仮の値を使う。
             vertex.uv = DirectX::XMFLOAT4(0, 0, 0, 1);
-            vertex.normal = DirectX::XMFLOAT4(0, 1, 0, 0);
+
+            ufbx_vec3 n = ufbx_get_vertex_vec3(
+                &mesh->vertex_normal, cornerIndex);
+            n = ufbx_transform_direction(&normalMatrix, n);
+
+            // 法線の向きを保ったまま、長さ1にする。
+            const double length = std::sqrt(n.x * n.x + n.y * n.y + n.z * n.z);
+            if (!std::isfinite(length) || length <= 0.0) return E_FAIL;
+            vertex.normal = DirectX::XMFLOAT4(
+                static_cast<float>(n.x / length),
+                static_cast<float>(n.y / length),
+                static_cast<float>(n.z / length), 0.0f);
 
             if (!std::isfinite(vertex.position.x)
                 || !std::isfinite(vertex.position.y)
