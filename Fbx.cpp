@@ -88,7 +88,40 @@ HRESULT Fbx::Load(const std::string& fileName)
     return S_OK;
 }
 
-void Fbx::Draw(Transform&) {} // まだ描画しない
+void Fbx::Draw(Transform& transform)
+{
+    if (!pVertexBuffer_ || !pIndexBuffer_ || !pConstantBuffer_) return;
+
+    Direct3D::SetShader(SHADER_3D);
+
+    CONSTANT_BUFFER cb = {};
+    cb.matWVP = DirectX::XMMatrixTranspose(
+        transform.GetWorldMatrix()
+        * Camera::GetViewMatrix()
+        * Camera::GetProjectionMatrix());
+    cb.matW = DirectX::XMMatrixTranspose(transform.GetWorldMatrix());
+    Direct3D::pContext->UpdateSubresource(
+        pConstantBuffer_, 0, nullptr, &cb, 0, 0);
+
+    UINT stride = sizeof(VERTEX);
+    UINT offset = 0;
+    Direct3D::pContext->IASetVertexBuffers(
+        0, 1, &pVertexBuffer_, &stride, &offset);
+    Direct3D::pContext->IASetIndexBuffer(
+        pIndexBuffer_, DXGI_FORMAT_R32_UINT, 0);
+    Direct3D::pContext->IASetPrimitiveTopology(
+        D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    Direct3D::pContext->VSSetConstantBuffers(
+        0, 1, &pConstantBuffer_);
+
+    // まだマテリアルを読み込まないのでテクスチャは指定しない。
+    // 別の描画処理から残ったテクスチャを使わないようにする。
+    ID3D11ShaderResourceView* nullSRV = nullptr;
+    Direct3D::pContext->PSSetShaderResources(0, 1, &nullSRV);
+
+    Direct3D::pContext->DrawIndexed(
+        static_cast<UINT>(indices_.size()), 0, 0);
+}
 
 HRESULT Fbx::ReadVertices(const ufbx_node* node)
 {
