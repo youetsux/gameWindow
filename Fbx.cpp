@@ -69,6 +69,7 @@ HRESULT Fbx::Load(const std::string& fileName)
 
     HRESULT hr = S_OK;
     hr = ReadVertices(meshNode);
+    if (SUCCEEDED(hr)) hr = ReadIndices(mesh);
 
     // 必要な値を自分のvectorへコピーした後で、ufbxのデータを解放する。
     ufbx_free_scene(scene);
@@ -134,4 +135,26 @@ HRESULT Fbx::ReadVertices(const ufbx_node* node)
         }
     }
     return vertices_.empty() ? E_FAIL : S_OK;
+}
+
+HRESULT Fbx::ReadIndices(const ufbx_mesh* mesh)
+{
+    if (mesh->faces.count == 0) return E_FAIL;
+    indices_.clear();
+
+    for (size_t faceIndex = 0; faceIndex < mesh->faces.count; faceIndex++)
+    {
+        const ufbx_face face = mesh->faces.data[faceIndex];
+        if (face.num_indices != 3) return E_FAIL;
+
+        for (uint32_t corner = 0; corner < 3; corner++)
+        {
+            const size_t cornerIndex = face.index_begin + corner;
+            if (cornerIndex >= vertices_.size()
+                || cornerIndex > UINT32_MAX) return E_FAIL;
+
+            indices_.push_back(static_cast<uint32_t>(cornerIndex));
+        }
+    }
+    return indices_.size() == vertices_.size() ? S_OK : E_FAIL;
 }
