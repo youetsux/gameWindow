@@ -109,13 +109,13 @@ void Fbx::Draw(Transform& transform)
     Direct3D::SetShader(SHADER_3D);
 
     CONSTANT_BUFFER cb = {};
+    cb.useLighting = 0;
+    cb.useTexture = 0;
     cb.matWVP = DirectX::XMMatrixTranspose(
         transform.GetWorldMatrix()
         * Camera::GetViewMatrix()
         * Camera::GetProjectionMatrix());
     cb.matW = DirectX::XMMatrixTranspose(transform.GetWorldMatrix());
-    Direct3D::pContext->UpdateSubresource(
-        pConstantBuffer_, 0, nullptr, &cb, 0, 0);
 
     UINT stride = sizeof(VERTEX);
     UINT offset = 0;
@@ -127,20 +127,35 @@ void Fbx::Draw(Transform& transform)
         D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     Direct3D::pContext->VSSetConstantBuffers(
         0, 1, &pConstantBuffer_);
-
-    // まだマテリアルを読み込まないのでテクスチャは指定しない。
-    // 別の描画処理から残ったテクスチャを使わないようにする。
-    ID3D11ShaderResourceView* nullSRV = nullptr;
-    Direct3D::pContext->PSSetShaderResources(0, 1, &nullSRV);
+    Direct3D::pContext->PSSetConstantBuffers(
+        0, 1, &pConstantBuffer_);
 
     for (const auto& material : materials_)
     {
         if (material.indexCount)
         {
+            cb.diffuse = material.texture
+                ? DirectX::XMFLOAT4(1, 1, 1, 1)
+                : material.diffuse;
+            cb.useTexture = material.texture ? 1 : 0;
+
+            ID3D11ShaderResourceView* srv = material.texture
+                ? material.texture->GetSRV() : nullptr;
+            ID3D11SamplerState* sampler = material.texture
+                ? material.texture->GetSampler() : nullptr;
+            Direct3D::pContext->PSSetShaderResources(0, 1, &srv);
+            Direct3D::pContext->PSSetSamplers(0, 1, &sampler);
+            Direct3D::pContext->UpdateSubresource(
+                pConstantBuffer_, 0, nullptr, &cb, 0, 0);
             Direct3D::pContext->DrawIndexed(
                 material.indexCount, material.firstIndex, 0);
         }
     }
+
+    ID3D11ShaderResourceView* srv = nullptr;
+    ID3D11SamplerState* sampler = nullptr;
+    Direct3D::pContext->PSSetShaderResources(0, 1, &srv);
+    Direct3D::pContext->PSSetSamplers(0, 1, &sampler);
 }
 
 HRESULT Fbx::ReadVertices(const ufbx_node* node)

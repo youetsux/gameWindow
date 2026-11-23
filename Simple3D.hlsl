@@ -9,10 +9,13 @@ SamplerState	g_sampler : register(s0);	//サンプラー
 // コンスタントバッファ
 // DirectX 側から送信されてくる、ポリゴン頂点以外の諸情報の定義
 //───────────────────────────────────────
-cbuffer global
+cbuffer global : register(b0)
 {
 	float4x4	matWVP;			// ワールド・ビュー・プロジェクションの合成行列
 	float4x4	matW;		// ワールド行列
+	float4 diffuse;
+	uint useLighting;
+	uint useTexture;
 };
 
 //───────────────────────────────────────
@@ -47,7 +50,9 @@ VS_OUT VS(float4 pos : POSITION,
 	float4 light = float4(-1, 0.5, -0.7, 0);
 	//float4 light = float4(1.0 , 0.0, 0.0, 0);
 	light = normalize(light);
-	outData.color = dot(normal, light);
+	outData.color = diffuse;
+	if (useLighting)
+		outData.color *= dot(normal, light);
 	
 
 
@@ -60,5 +65,7 @@ VS_OUT VS(float4 pos : POSITION,
 //───────────────────────────────────────
 float4 PS(VS_OUT inData) : SV_Target
 {
-	return g_texture.Sample(g_sampler, inData.uv) * inData.color;
+	if (useTexture)
+		return g_texture.Sample(g_sampler, inData.uv) * inData.color;
+	return inData.color;
 }

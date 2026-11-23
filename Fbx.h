@@ -34,6 +34,10 @@ private:
     {
         DirectX::XMMATRIX matWVP;
         DirectX::XMMATRIX matW;
+        DirectX::XMFLOAT4 diffuse = { 1, 1, 1, 1 };
+        UINT useLighting = 1;
+        UINT useTexture = 1;
+        UINT padding[2] = {};
     };
 
     struct MaterialRange

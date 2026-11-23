@@ -11,6 +11,10 @@ struct CONSTANT_BUFFER
 {
 	XMMATRIX	matWVP;
 	XMMATRIX	matW;
+	XMFLOAT4 diffuse = { 1, 1, 1, 1 };
+	UINT useLighting = 1;
+	UINT useTexture = 1;
+	UINT padding[2] = {};
 };
 
 

@@ -91,9 +91,12 @@ void Quad::Draw(Transform& transform)
 
 	Direct3D::SetShader(SHADER_3D);
 
-	CONSTANT_BUFFER cb;
+	CONSTANT_BUFFER cb = {};
 	cb.matWVP = XMMatrixTranspose(WorldMatrix * Camera::GetViewMatrix() * Camera::GetProjectionMatrix());
 	cb.matW = XMMatrixTranspose(WorldMatrix); //ワールド行列を転置してコンスタントバッファに渡す
+	cb.diffuse = { 1, 1, 1, 1 };
+	cb.useLighting = 1;
+	cb.useTexture = 1;
 
 	//コンスタントバッファにデータを転送する
 	D3D11_MAPPED_SUBRESOURCE pdata;
